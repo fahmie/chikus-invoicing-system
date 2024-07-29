@@ -1,0 +1,2 @@
+-Using php version 7.3
+-need imagick php extension
