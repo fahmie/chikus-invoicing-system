@@ -20,3 +20,4 @@ yarn-error.log
 /.env
 /composer.lock
 *.env
+*.tmp

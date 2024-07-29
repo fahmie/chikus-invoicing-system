@@ -694,15 +694,68 @@ class PDFService extends PDF_ImageAlpha
 
     private function resizeToFit($image)
     {
-        list($width, $height) = getimagesize($image);
+        // Helper function to check if a URL exists
+        function urlExists($url)
+        {
+            $headers = @get_headers($url);
+            if ($headers && strpos($headers[0], '200') !== false) {
+                return true;
+            }
+            return false;
+        }
+    
+        // Check if the path is a URL
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            if (!urlExists($image)) {
+                throw new \Exception("URL File does not exist or is not accessible: $image");
+            }
+        } else {
+            // Check if the local file exists
+            if (!file_exists($image)) {
+                throw new \Exception("Local file does not exist: $image");
+            }
+        }
+    
+        // Create image resource from file or URL
+        $img = null;
+        $imageType = exif_imagetype($image);
+    
+        switch ($imageType) {
+            case IMAGETYPE_JPEG:
+                $img = imagecreatefromjpeg($image);
+                break;
+            case IMAGETYPE_PNG:
+                $img = imagecreatefrompng($image);
+                break;
+            case IMAGETYPE_GIF:
+                $img = imagecreatefromgif($image);
+                break;
+            default:
+                throw new \Exception("Unsupported image type: $image");
+        }
+    
+        if ($img === false) {
+            throw new \Exception("Failed to create image from file: $image");
+        }
+    
+        // Get image dimensions
+        $width = imagesx($img);
+        $height = imagesy($img);
+    
+        // Free up memory
+        imagedestroy($img);
+    
         $newWidth = $this->maxImageDimensions[0] / $width;
         $newHeight = $this->maxImageDimensions[1] / $height;
         $scale = min($newWidth, $newHeight);
+    
         return array(
             round($this->pixelsToMM($scale * $width)),
             round($this->pixelsToMM($scale * $height))
         );
     }
+    
+    
 
     private function pixelsToMM($val)
     {
