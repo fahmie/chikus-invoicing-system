@@ -5,17 +5,17 @@ namespace App\Models;
 use App\Traits\HasAddresses;
 use App\Traits\UUIDTrait;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model implements HasMedia
 {
     use HasAddresses;
-    use HasMediaTrait;
+    use InteractsWithMedia;
     use UUIDTrait;
     use SoftDeletes;
-  
+
     /**
      * The attributes that are mass assignable.
      *
@@ -25,8 +25,8 @@ class Company extends Model implements HasMedia
         'id',
         'name',
         'owner_id',
-    ]; 
-    
+    ];
+
     protected $dates = ['deleted_at'];
     /**
      * Define Relation with User Model
@@ -113,15 +113,15 @@ class Company extends Model implements HasMedia
      * @return boolean
      */
     public function isPaypalActive()
-    {   
+    {
         if (
-            $this->getSetting('paypal_active') 
+            $this->getSetting('paypal_active')
             && $this->getSetting('paypal_username') != ''
             && $this->getSetting('paypal_password') != ''
             && $this->getSetting('paypal_signature') != ''
-        ) 
+        )
             return true;
-        else 
+        else
             return false;
     }
 
@@ -133,16 +133,16 @@ class Company extends Model implements HasMedia
     public function isStripeActive()
     {
         if (
-            $this->getSetting('stripe_active') 
+            $this->getSetting('stripe_active')
             && $this->getSetting('stripe_secret_key') != ''
             && $this->getSetting('stripe_public_key') != ''
-        ) 
+        )
             return true;
-        else 
+        else
             return false;
     }
 
-     /**
+    /**
      * Check if Razorpay Gateway is Active
      * 
      * @return boolean
@@ -150,12 +150,12 @@ class Company extends Model implements HasMedia
     public function isRazorpayActive()
     {
         if (
-            $this->getSetting('razorpay_active') 
+            $this->getSetting('razorpay_active')
             && $this->getSetting('razorpay_id') != ''
             && $this->getSetting('razorpay_secret_key') != ''
-        ) 
+        )
             return true;
-        else 
+        else
             return false;
     }
 
@@ -187,12 +187,12 @@ class Company extends Model implements HasMedia
     public function getAvatarAttribute()
     {
         return $this->getFirstMedia('avatar')
-            ? $this->getFirstMedia('avatar')->getFullUrl() 
+            ? $this->getFirstMedia('avatar')->getFullUrl()
             : $this->getDefaultAvatar();
     }
 
     public function address()
     {
-    	return $this->hasOne(Address::class, 'id', 'model_id');
+        return $this->hasOne(Address::class, 'id', 'model_id');
     }
 }
