@@ -8,8 +8,8 @@ use App\Traits\UUIDTrait;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use App\Permissions\HasPermissionsTrait;
 
 class User extends Authenticatable implements HasMedia
@@ -19,7 +19,7 @@ class User extends Authenticatable implements HasMedia
     use HasAddresses;
     use CompanyUserTrait;
     use HasApiTokens;
-    use HasMediaTrait;
+    use InteractsWithMedia;
     use HasPermissionsTrait; //Import The Trait
 
     /**
@@ -27,7 +27,7 @@ class User extends Authenticatable implements HasMedia
      *
      * @var array
      */
-    protected $fillable = [ 
+    protected $fillable = [
         'first_name',
         'last_name',
         'username',
@@ -50,7 +50,7 @@ class User extends Authenticatable implements HasMedia
         'password',
         'remember_token',
     ];
- 
+
     /**
      * Define Relation with UserSetting Model
      *
@@ -101,9 +101,10 @@ class User extends Authenticatable implements HasMedia
      *
      * @return void
      */
-    public function registerMediaCollections()
+    // Ensure this method matches the correct signature
+    public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('avatar')->singleFile();
+        $this->addMediaCollection('avatars')->singleFile();
     }
 
     /**
@@ -124,17 +125,17 @@ class User extends Authenticatable implements HasMedia
     public function getAvatarAttribute()
     {
         return $this->getFirstMedia('avatar')
-            ? $this->getFirstMedia('avatar')->getFullUrl() 
+            ? $this->getFirstMedia('avatar')->getFullUrl()
             : $this->getDefaultAvatar();
     }
-    
+
     public function sites()
     {
-    	return $this->hasOne(Site::class, 'id', 'sites_id');
+        return $this->hasOne(Site::class, 'id', 'sites_id');
     }
 
     public function companyid()
     {
-    	return $this->hasOne(CompanyUser::class);
+        return $this->hasOne(CompanyUser::class);
     }
 }

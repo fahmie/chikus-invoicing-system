@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Expense extends Model implements HasMedia
 {
-    use HasMediaTrait;
+    use InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -76,7 +76,7 @@ class Expense extends Model implements HasMedia
         $dateFormat = CompanySetting::getSetting('date_format', $this->company_id);
         return Carbon::parse($this->expense_date)->format($dateFormat);
     }
- 
+
     /**
      * Set formatted_created_at attribute by custom date format
      * from Company Settings
@@ -94,11 +94,12 @@ class Expense extends Model implements HasMedia
      *
      * @return void
      */
-    public function registerMediaCollections()
+    // Ensure this method matches the correct signature
+    public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('receipt')->singleFile();
+        $this->addMediaCollection('avatars')->singleFile();
     }
- 
+
     /**
      * Get Receipt Attachment Url
      * 
@@ -107,7 +108,7 @@ class Expense extends Model implements HasMedia
     public function getReceiptAttribute()
     {
         return $this->getFirstMedia('receipt')
-            ? $this->getFirstMedia('receipt')->getFullUrl() 
+            ? $this->getFirstMedia('receipt')->getFullUrl()
             : null;
     }
 
