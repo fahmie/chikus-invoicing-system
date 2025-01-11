@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr">
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,7 +15,7 @@
     <div class="layout-login-centered-boxed__form card">
         <div class="d-flex flex-column justify-content-center align-items-center mt-2 mb-2 navbar-light">
             <a href="{{ url('/login') }}" class="navbar-brand flex-column mb-2 align-items-center mr-0">
-                <img class="navbar-brand-icon mr-0 mb-2" src="{{ asset('assets/images/avatar/cara.png') }}" width="150" alt="{{ config('app.name') }}">
+                <img class="navbar-brand-icon mr-0 mb-2" src="{{ asset('assets/images/avatar/amzartech.png') }}" width="200" alt="{{ config('app.name') }}">
                 <!-- <span>{{ config('app.name') }}</span> -->
                 <span>Invoice System</span>
             </a>
@@ -26,4 +27,5 @@
     @include('layouts._js')
     @include('layouts._flash')
 </body>
+
 </html>
