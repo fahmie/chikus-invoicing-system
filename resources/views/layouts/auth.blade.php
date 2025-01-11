@@ -15,7 +15,7 @@
     <div class="layout-login-centered-boxed__form card">
         <div class="d-flex flex-column justify-content-center align-items-center mt-2 mb-2 navbar-light">
             <a href="{{ url('/login') }}" class="navbar-brand flex-column mb-2 align-items-center mr-0">
-                <img class="navbar-brand-icon mr-0 mb-2" src="{{ asset('assets/images/avatar/amzartech.png') }}" width="200" alt="{{ config('app.name') }}">
+                <img class="navbar-brand-icon mr-0 mb-2" src="{{ asset('assets/images/avatar/amzartech.png') }}" width="300" alt="{{ config('app.name') }}">
                 <!-- <span>{{ config('app.name') }}</span> -->
                 <span>Invoice System</span>
             </a>

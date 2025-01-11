@@ -12,7 +12,7 @@
 <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/avatar/modkha.png') }}" />
 
 <!-- company based preferences -->
-@shared
+
 <!-- END company based preferences -->
 
 <!-- page based scripts & styles -->
