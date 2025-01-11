@@ -59,7 +59,7 @@ class DriverController extends Controller
             AllowedFilter::partial('driverLorryType.name'),
     
         ])
-        ->paginate(20)
+        ->simplePaginate(20)
         ->appends(request()->query());
     
 

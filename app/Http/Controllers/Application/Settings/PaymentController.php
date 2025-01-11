@@ -24,7 +24,7 @@ class PaymentController extends Controller
         $currentCompany = $user->currentCompany();
 
         // Get Payment Types by Company
-        $payment_types = PaymentMethod::findByCompany($currentCompany->id)->paginate(15);
+        $payment_types = PaymentMethod::findByCompany($currentCompany->id)->simplePaginate(15);
 
         return view('application.settings.payment.index', [
             'payment_types' => $payment_types,

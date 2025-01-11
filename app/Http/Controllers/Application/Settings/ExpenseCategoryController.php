@@ -28,7 +28,7 @@ class ExpenseCategoryController extends Controller
         $currentCompany = $user->currentCompany();
 
         // Get Expense Categories by Company
-        $expense_categories = ExpenseCategory::findByCompany($currentCompany->id)->paginate(15);
+        $expense_categories = ExpenseCategory::findByCompany($currentCompany->id)->simplePaginate(15);
 
         return view('application.settings.expense_category.index', [
             'expense_categories' => $expense_categories,

@@ -25,16 +25,16 @@ class SupplierController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
-            $supplier = Supplier::paginate(10);
-        }elseif(Auth::user()->roles =="admin_company"){
+        if (Auth::user()->roles == "superadmin") {
+            $supplier = Supplier::simplePaginate(10);
+        } elseif (Auth::user()->roles == "admin_company") {
             $sites_id = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $supplier = Supplier::whereIn('sites_id', $sites_id)->paginate(10);
-        }else {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-            $supplier = Supplier::paginate(10);
+            $supplier = Supplier::whereIn('sites_id', $sites_id)->simplePaginate(10);
+        } else {
+            $supplier = Supplier::simplePaginate(10);
         }
 
-        return view('application.inventory_setting.supplier.index',compact('supplier'));
+        return view('application.inventory_setting.supplier.index', compact('supplier'));
     }
 
     /**
@@ -52,15 +52,15 @@ class SupplierController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
-        }elseif(Auth::user()->roles =="admin_company"){
-            $sites = Site::where('company_id',$currentCompany->id)->get();
-        }else {     
+        } elseif (Auth::user()->roles == "admin_company") {
+            $sites = Site::where('company_id', $currentCompany->id)->get();
+        } else {
             $sites = Site::all();
         }
 
-        return view('application.inventory_setting.supplier.create',compact('sites'));
+        return view('application.inventory_setting.supplier.create', compact('sites'));
     }
 
     /**
@@ -115,7 +115,7 @@ class SupplierController extends Controller
      * @param  \App\Models\Supplier  $supplier
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request,Supplier $supplier)
+    public function edit(Request $request, Supplier $supplier)
     {
         if (!Auth::user()->can('supplier-edit')) {
             abort(403);
@@ -125,15 +125,15 @@ class SupplierController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
-        }elseif(Auth::user()->roles =="admin_company"){
-            $sites = Site::where('company_id',$currentCompany->id)->get();
-        }else {     
+        } elseif (Auth::user()->roles == "admin_company") {
+            $sites = Site::where('company_id', $currentCompany->id)->get();
+        } else {
             $sites = Site::all();
         }
 
-        return view('application.inventory_setting.supplier.edit',compact('sites','supplier'));
+        return view('application.inventory_setting.supplier.edit', compact('sites', 'supplier'));
     }
 
     /**
@@ -167,7 +167,7 @@ class SupplierController extends Controller
      * @param  \App\Models\Supplier  $supplier
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Supplier $supplier,$id)
+    public function destroy(Supplier $supplier, $id)
     {
         if (!Auth::user()->can('supplier-delete')) {
             abort(403);

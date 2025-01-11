@@ -107,7 +107,7 @@ class ReceiptController extends Controller
                 AllowedFilter::partial('clients.company_name'),
                 AllowedFilter::partial('status'),
             ])
-            ->paginate(10)
+            ->simplePaginate(10)
             ->appends(request()->query());
     
         return view('application.receipts.index', [

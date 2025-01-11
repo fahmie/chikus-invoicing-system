@@ -26,16 +26,16 @@ class ProductInventoryController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
-            $productInventory = ProductInventory::paginate(10);
-        }elseif(Auth::user()->roles =="admin_company"){
+        if (Auth::user()->roles == "superadmin") {
+            $productInventory = ProductInventory::simplePaginate(10);
+        } elseif (Auth::user()->roles == "admin_company") {
             $sites_id = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $productInventory = ProductInventory::whereIn('sites_id', $sites_id)->paginate(10);
-        }else {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-            $productInventory = ProductInventory::paginate(10);
+            $productInventory = ProductInventory::whereIn('sites_id', $sites_id)->simplePaginate(10);
+        } else {
+            $productInventory = ProductInventory::simplePaginate(10);
         }
 
-        return view('application.inventory_setting.product.index',compact('productInventory'));
+        return view('application.inventory_setting.product.index', compact('productInventory'));
     }
 
     /**
@@ -53,15 +53,15 @@ class ProductInventoryController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
-        }elseif(Auth::user()->roles =="admin_company"){
-            $sites = Site::where('company_id',$currentCompany->id)->get();
-        }else {     
+        } elseif (Auth::user()->roles == "admin_company") {
+            $sites = Site::where('company_id', $currentCompany->id)->get();
+        } else {
             $sites = Site::all();
         }
         $unit = ProductUnit::all();
-        return view('application.inventory_setting.product.create',compact('sites','unit'));
+        return view('application.inventory_setting.product.create', compact('sites', 'unit'));
     }
 
     /**
@@ -75,9 +75,9 @@ class ProductInventoryController extends Controller
         if (!Auth::user()->can('product-inventory-store')) {
             abort(403);
         }
-        
+
         $request->validate([
-            'name' => 'required|unique:product_inventories,name,NULL,id,sites_id,'.$request->sites_id,
+            'name' => 'required|unique:product_inventories,name,NULL,id,sites_id,' . $request->sites_id,
             'unit_id' => 'required|numeric',
             'sites_id' => 'required|numeric',
 
@@ -113,7 +113,7 @@ class ProductInventoryController extends Controller
      * @param  \App\Models\ProductInventory  $productInventory
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request,ProductInventory $productInventory)
+    public function edit(Request $request, ProductInventory $productInventory)
     {
         if (!Auth::user()->can('product-inventory-edit')) {
             abort(403);
@@ -123,16 +123,16 @@ class ProductInventoryController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
-        }elseif(Auth::user()->roles =="admin_company"){
-            $sites = Site::where('company_id',$currentCompany->id)->get();
-        }else {     
+        } elseif (Auth::user()->roles == "admin_company") {
+            $sites = Site::where('company_id', $currentCompany->id)->get();
+        } else {
             $sites = Site::all();
         }
         $unit = ProductUnit::all();
 
-        return view('application.inventory_setting.product.edit',compact('productInventory','sites','unit'));
+        return view('application.inventory_setting.product.edit', compact('productInventory', 'sites', 'unit'));
     }
 
     /**
@@ -165,7 +165,7 @@ class ProductInventoryController extends Controller
      * @param  \App\Models\ProductInventory  $productInventory
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProductInventory $productInventory,$id)
+    public function destroy(ProductInventory $productInventory, $id)
     {
         if (!Auth::user()->can('product-inventory-delete')) {
             abort(403);

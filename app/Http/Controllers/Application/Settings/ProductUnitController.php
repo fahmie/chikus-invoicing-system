@@ -11,7 +11,7 @@ use App\Models\Company;
 use Auth;
 
 class ProductUnitController extends Controller
-{ 
+{
     /**
      * Display the Form for Creating New Product Unit
      *
@@ -33,17 +33,17 @@ class ProductUnitController extends Controller
         if (!empty($request->old())) {
             $product_unit->fill($request->old());
         }
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $company = Company::all();
-        }else{
-            $company = Company::where('id', $currentCompany->id)->paginate(15);
+        } else {
+            $company = Company::where('id', $currentCompany->id)->simplePaginate(15);
         }
         return view('application.settings.product.unit.create', [
             'product_unit' => $product_unit,
             'company' => $company,
         ]);
     }
- 
+
     /**
      * Store the Product Unit in Database
      *
@@ -64,7 +64,7 @@ class ProductUnitController extends Controller
             'name' => $request->name,
             'company_id' =>  $request->company_id,
         ]);
- 
+
         session()->flash('alert-success', __('messages.product_unit_category_added'));
         return redirect()->route('settings.product');
     }
@@ -77,7 +77,7 @@ class ProductUnitController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit(Request $request)
-    {       
+    {
         if (!Auth::user()->can('setting-productunit-edit')) {
             abort(403);
         }
@@ -85,12 +85,12 @@ class ProductUnitController extends Controller
         $currentCompany = $user->currentCompany();
 
         $product_unit = ProductUnit::findOrFail($request->product_unit);
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $company = Company::all();
-        }else{
-            $company = Company::where('id', $currentCompany->id)->paginate(15);
+        } else {
+            $company = Company::where('id', $currentCompany->id)->simplePaginate(15);
         }
- 
+
         return view('application.settings.product.unit.edit', [
             'product_unit' => $product_unit,
             'company' => $company,
@@ -110,12 +110,12 @@ class ProductUnitController extends Controller
             abort(403);
         }
         $product_unit = ProductUnit::findOrFail($request->product_unit);
-        
+
         // Update Product Unit in Database
         $product_unit->update([
             'name' => $request->name
         ]);
- 
+
         session()->flash('alert-success', __('messages.product_unit_category_updated'));
         return redirect()->route('settings.product');
     }
@@ -133,7 +133,7 @@ class ProductUnitController extends Controller
             abort(403);
         }
         $product_unit = ProductUnit::findOrFail($request->product_unit);
-        
+
         // Delete Product Unit from Database
         $product_unit->delete();
 

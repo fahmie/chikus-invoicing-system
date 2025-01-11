@@ -34,80 +34,77 @@ class InventoryManagementController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
-            $suppliers = Inventory::with("suppliers","sites")->select('supplier_id')->distinct('supplier_id')->get();
+        if (Auth::user()->roles == "superadmin") {
+            $suppliers = Inventory::with("suppliers", "sites")->select('supplier_id')->distinct('supplier_id')->get();
             $inventory = array();
-            foreach($suppliers as $supplier)
-            {
+            foreach ($suppliers as $supplier) {
                 //$inventory[$supplier->suppliers->name] = Inventory::where('supplier_id',$supplier->supplier_id)->paginate(1,['*'], str_replace(" ","_",$supplier->suppliers->name));
-                $inventory[$supplier->suppliers->name] = Inventory::where('supplier_id',$supplier->supplier_id);
+                $inventory[$supplier->suppliers->name] = Inventory::where('supplier_id', $supplier->supplier_id);
 
                 $inventory[$supplier->suppliers->name] = QueryBuilder::for($inventory[$supplier->suppliers->name])
-                ->allowedFilters([
-                    AllowedFilter::partial('date'),
-                    AllowedFilter::partial('time'),
-                    AllowedFilter::exact('sites_id'),
-                    AllowedFilter::exact('product_id'),
-                    AllowedFilter::exact('supplier_id'),
-                    AllowedFilter::partial('stock_in'),
-                    AllowedFilter::partial('stock_out'),
-                    AllowedFilter::partial('remark'),
-        
-                ])
-                ->latest()
-                ->paginate(10,['*'], str_replace(" ","_",$supplier->suppliers->name))
-                ->appends(request()->query());
+                    ->allowedFilters([
+                        AllowedFilter::partial('date'),
+                        AllowedFilter::partial('time'),
+                        AllowedFilter::exact('sites_id'),
+                        AllowedFilter::exact('product_id'),
+                        AllowedFilter::exact('supplier_id'),
+                        AllowedFilter::partial('stock_in'),
+                        AllowedFilter::partial('stock_out'),
+                        AllowedFilter::partial('remark'),
+
+                    ])
+                    ->latest()
+                    ->simplePaginate(10, ['*'], str_replace(" ", "_", $supplier->suppliers->name))
+                    ->appends(request()->query());
             }
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $sites_id = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $suppliers = Inventory::with("suppliers","sites")->select('supplier_id')->distinct('supplier_id')->whereIn('sites_id', $sites_id)->get();
+            $suppliers = Inventory::with("suppliers", "sites")->select('supplier_id')->distinct('supplier_id')->whereIn('sites_id', $sites_id)->get();
             $inventory = array();
-            foreach($suppliers as $supplier)
-            {
-                $inventory[$supplier->suppliers->name] = Inventory::where('supplier_id',$supplier->supplier_id);
+            foreach ($suppliers as $supplier) {
+                $inventory[$supplier->suppliers->name] = Inventory::where('supplier_id', $supplier->supplier_id);
 
                 $inventory[$supplier->suppliers->name] = QueryBuilder::for($inventory[$supplier->suppliers->name])
-                ->allowedFilters([
-                    AllowedFilter::partial('date'),
-                    AllowedFilter::partial('time'),
-                    AllowedFilter::exact('sites_id'),
-                    AllowedFilter::exact('product_id'),
-                    AllowedFilter::exact('supplier_id'),
-                    AllowedFilter::partial('stock_in'),
-                    AllowedFilter::partial('stock_out'),
-                    AllowedFilter::partial('remark'),
-        
-                ])
-                ->latest()
-                ->paginate(10,['*'], str_replace(" ","_",$supplier->suppliers->name))
-                ->appends(request()->query());
+                    ->allowedFilters([
+                        AllowedFilter::partial('date'),
+                        AllowedFilter::partial('time'),
+                        AllowedFilter::exact('sites_id'),
+                        AllowedFilter::exact('product_id'),
+                        AllowedFilter::exact('supplier_id'),
+                        AllowedFilter::partial('stock_in'),
+                        AllowedFilter::partial('stock_out'),
+                        AllowedFilter::partial('remark'),
+
+                    ])
+                    ->latest()
+                    ->simplePaginate(10, ['*'], str_replace(" ", "_", $supplier->suppliers->name))
+                    ->appends(request()->query());
             }
-        }else{
-            $suppliers = Inventory::with("suppliers","sites")->select('supplier_id')->distinct('supplier_id')->get();
+        } else {
+            $suppliers = Inventory::with("suppliers", "sites")->select('supplier_id')->distinct('supplier_id')->get();
             $inventory = array();
-            foreach($suppliers as $supplier)
-            {
-                $inventory[$supplier->suppliers->name] = Inventory::where('supplier_id',$supplier->supplier_id);
+            foreach ($suppliers as $supplier) {
+                $inventory[$supplier->suppliers->name] = Inventory::where('supplier_id', $supplier->supplier_id);
 
                 $inventory[$supplier->suppliers->name] = QueryBuilder::for($inventory[$supplier->suppliers->name])
-                ->allowedFilters([
-                    AllowedFilter::partial('date'),
-                    AllowedFilter::partial('time'),
-                    AllowedFilter::exact('sites_id'),
-                    AllowedFilter::exact('product_id'),
-                    AllowedFilter::exact('supplier_id'),
-                    AllowedFilter::partial('stock_in'),
-                    AllowedFilter::partial('stock_out'),
-                    AllowedFilter::partial('remark'),
-        
-                ])
-                ->latest()
-                ->paginate(10,['*'], str_replace(" ","_",$supplier->suppliers->name))
-                ->appends(request()->query());
+                    ->allowedFilters([
+                        AllowedFilter::partial('date'),
+                        AllowedFilter::partial('time'),
+                        AllowedFilter::exact('sites_id'),
+                        AllowedFilter::exact('product_id'),
+                        AllowedFilter::exact('supplier_id'),
+                        AllowedFilter::partial('stock_in'),
+                        AllowedFilter::partial('stock_out'),
+                        AllowedFilter::partial('remark'),
+
+                    ])
+                    ->latest()
+                    ->simplePaginate(10, ['*'], str_replace(" ", "_", $supplier->suppliers->name))
+                    ->appends(request()->query());
             }
         }
 
-       
+
         return view('application.inventory_management.index', compact('inventory'));
     }
 
@@ -126,22 +123,22 @@ class InventoryManagementController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
             $supplier = Supplier::all();
             $productinventory = ProductInventory::all();
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $sitebycompany = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $sites = Site::where('company_id',$currentCompany->id)->get();
-            $supplier = Supplier::whereIn('sites_id',$sitebycompany)->get();
-            $productinventory = ProductInventory::whereIn('sites_id',$sitebycompany)->get();
-        }else {     
+            $sites = Site::where('company_id', $currentCompany->id)->get();
+            $supplier = Supplier::whereIn('sites_id', $sitebycompany)->get();
+            $productinventory = ProductInventory::whereIn('sites_id', $sitebycompany)->get();
+        } else {
             $sites = Site::all();
             $supplier = Supplier::all();
             $productinventory = ProductInventory::all();
         }
 
-        return view('application.inventory_management.create',compact('sites','supplier','productinventory'));
+        return view('application.inventory_management.create', compact('sites', 'supplier', 'productinventory'));
     }
 
     /**
@@ -164,10 +161,10 @@ class InventoryManagementController extends Controller
             'time' => 'required',
             'stock_in' => 'required|numeric',
         ]);
-        $last_balance = Inventory::where('sites_id', request()->sites_id)->where('supplier_id', request()->supplier_id)->where('product_id',request()->product_id)->latest()->first();
-        if(empty($last_balance)){
+        $last_balance = Inventory::where('sites_id', request()->sites_id)->where('supplier_id', request()->supplier_id)->where('product_id', request()->product_id)->latest()->first();
+        if (empty($last_balance)) {
             $balance = 0;
-        }else{
+        } else {
             $balance = $last_balance->stock;
         }
         $inventory = new Inventory;
@@ -178,7 +175,7 @@ class InventoryManagementController extends Controller
         $inventory->time = request()->time;
         $inventory->stock_in = request()->stock_in;
         $inventory->remark = request()->remark;
-        $inventory->stock = $balance+request()->stock_in;
+        $inventory->stock = $balance + request()->stock_in;
         $inventory->save();
 
         session()->flash('alert-success', 'Success');
@@ -191,14 +188,14 @@ class InventoryManagementController extends Controller
      * @param  \App\Models\Inventory  $inventory
      * @return \Illuminate\Http\Response
      */
-    public function show(Inventory $inventory,$id)
+    public function show(Inventory $inventory, $id)
     {
         if (!Auth::user()->can('inventory-management-view')) {
             abort(403);
         }
 
         $inventory = Inventory::find($id);
-        return view('application.inventory_management.view',compact('inventory'));
+        return view('application.inventory_management.view', compact('inventory'));
     }
 
     public function stockout(Request $request)
@@ -211,25 +208,25 @@ class InventoryManagementController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
             $supplier = Supplier::all();
             $country = Country::all();
             $productinventory = ProductInventory::all();
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $sitebycompany = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $sites = Site::where('company_id',$currentCompany->id)->get();
-            $supplier = Supplier::whereIn('sites_id',$sitebycompany)->get();
-            $productinventory = ProductInventory::whereIn('sites_id',$sitebycompany)->get();
+            $sites = Site::where('company_id', $currentCompany->id)->get();
+            $supplier = Supplier::whereIn('sites_id', $sitebycompany)->get();
+            $productinventory = ProductInventory::whereIn('sites_id', $sitebycompany)->get();
             $country = Country::all();
-        }else {     
+        } else {
             $sites = Site::all();
             $supplier = Supplier::all();
             $productinventory = ProductInventory::all();
             $country = Country::all();
         }
 
-        return view('application.inventory_management.deduct',compact('sites','supplier','productinventory','country'));
+        return view('application.inventory_management.deduct', compact('sites', 'supplier', 'productinventory', 'country'));
     }
 
 
@@ -239,10 +236,10 @@ class InventoryManagementController extends Controller
             abort(403);
         }
 
-        $last_balance = Inventory::where('sites_id', request()->sites_id)->where('supplier_id', request()->supplier_id)->where('product_id',request()->product_id)->latest()->first();
-        if(empty($last_balance)){
+        $last_balance = Inventory::where('sites_id', request()->sites_id)->where('supplier_id', request()->supplier_id)->where('product_id', request()->product_id)->latest()->first();
+        if (empty($last_balance)) {
             $balance = 0;
-        }else{
+        } else {
             $balance = $last_balance->stock;
         }
 
@@ -252,7 +249,7 @@ class InventoryManagementController extends Controller
             'product_id' => 'required',
             'date' => 'required',
             'time' => 'required',
-            'stock_out' => 'required|numeric|min:1|max:'.$last_balance->stock,
+            'stock_out' => 'required|numeric|min:1|max:' . $last_balance->stock,
             'customer_name' => 'required',
             'customer_address' => 'required',
             'customer_country' => 'required',
@@ -266,7 +263,7 @@ class InventoryManagementController extends Controller
         $inventory->time = request()->time;
         $inventory->stock_out = request()->stock_out;
         $inventory->remark = request()->remark;
-        $inventory->stock = $balance-request()->stock_out;
+        $inventory->stock = $balance - request()->stock_out;
         $inventory->customer_name = request()->customer_name;
         $inventory->customer_address = request()->customer_address;
         $inventory->customer_email = request()->customer_email;
@@ -320,11 +317,11 @@ class InventoryManagementController extends Controller
 
     public function getProductBySupplierID($id)
     {
-        $productinventory = ProductInventory::where('id',$id)->get();
+        $productinventory = ProductInventory::where('id', $id)->get();
         return response()->json($productinventory);
     }
 
-    public function export(Request $request) 
+    public function export(Request $request)
     {
         if (!Auth::user()->can('inventory-management-export')) {
             abort(403);

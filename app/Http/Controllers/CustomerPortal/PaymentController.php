@@ -33,7 +33,7 @@ class PaymentController extends Controller
                 AllowedFilter::scope('from'),
                 AllowedFilter::scope('to'),
             ])
-            ->paginate()
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('customer_portal.payments.index', [

@@ -32,7 +32,7 @@ class EstimateController extends Controller
                 AllowedFilter::scope('from'),
                 AllowedFilter::scope('to'),
             ])
-            ->paginate()
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('customer_portal.estimates.index', [
@@ -81,6 +81,6 @@ class EstimateController extends Controller
         // Save the status
         $estimate->save();
 
-        return redirect()->route('customer_portal.estimates.details', [$currentCustomer->uid ,$estimate->uid]);
+        return redirect()->route('customer_portal.estimates.details', [$currentCustomer->uid, $estimate->uid]);
     }
 }

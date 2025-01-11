@@ -26,14 +26,13 @@ class SiteController extends Controller
 
         $user = $request->user();
         $currentCompany = $user->currentCompany();
-        if(Auth::user()->roles =="superadmin")
-        {
-            $data['sites'] = Site::paginate(5);
-        }elseif(Auth::user()->roles =="admin_company"){
+        if (Auth::user()->roles == "superadmin") {
+            $data['sites'] = Site::simplePaginate(5);
+        } elseif (Auth::user()->roles == "admin_company") {
             $sitebycompany = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $data['sites'] = Site::whereIn('id', $sitebycompany)->paginate(5);
-        }else {
-            $data['sites'] = Site::where('id', $user->sites_id)->paginate(5);
+            $data['sites'] = Site::whereIn('id', $sitebycompany)->simplePaginate(5);
+        } else {
+            $data['sites'] = Site::where('id', $user->sites_id)->simplePaginate(5);
         }
 
         return view('application.settings.site.index', $data);
@@ -51,15 +50,14 @@ class SiteController extends Controller
 
         $user = $request->user();
         $currentCompany = $user->currentCompany();
-        if(Auth::user()->roles =="superadmin")
-        {
+        if (Auth::user()->roles == "superadmin") {
             $company = Company::all();
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $company = Company::where('id', $currentCompany->id)->get();
-        }else {
+        } else {
             $company = Company::where('id', $currentCompany->id)->get();
         }
-        
+
 
         return view('application.settings.site.create_site', compact('company'));
     }
@@ -110,7 +108,7 @@ class SiteController extends Controller
      * @param  \App\Models\Site  $site
      * @return \Illuminate\Http\Response
      */
-    public function edit(Site $site,Request $request,$id)
+    public function edit(Site $site, Request $request, $id)
     {
         if (!Auth::user()->can('setting-sites-edit')) {
             abort(403);
@@ -118,16 +116,16 @@ class SiteController extends Controller
 
         $user = $request->user();
         $currentCompany = $user->currentCompany();
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $company = Company::all();
             $sites = Site::FindorFail($id);
-        }else{
+        } else {
             $company = Company::where('id', $currentCompany->id)->get();
             $sites = Site::FindorFail($user->sites_id);
         }
 
 
-        return view('application.settings.site.edit_site',compact('sites','company'));
+        return view('application.settings.site.edit_site', compact('sites', 'company'));
     }
 
     /**
@@ -137,13 +135,13 @@ class SiteController extends Controller
      * @param  \App\Models\Site  $site
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Site $site,$id)
+    public function update(Request $request, Site $site, $id)
     {
         if (!Auth::user()->can('setting-sites-edit')) {
             abort(403);
         }
         $request->validate([
-            'name' => 'required|unique:sites,name,'.$id,
+            'name' => 'required|unique:sites,name,' . $id,
             'poskod' => 'required|numeric',
             'phone' => 'required|numeric',
             'email' => 'required',
@@ -155,9 +153,9 @@ class SiteController extends Controller
         $user = $request->user();
         $currentCompany = $user->currentCompany();
 
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $site = Site::FindorFail($id);
-        }else{
+        } else {
             $site = Site::FindorFail($user->sites_id);
         }
         $site->update([
@@ -181,12 +179,12 @@ class SiteController extends Controller
      * @param  \App\Models\Site  $site
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Site $site,$id)
+    public function destroy(Site $site, $id)
     {
         if (!Auth::user()->can('setting-sites-delete')) {
             abort(403);
         }
-        
+
         $site = Site::find($id)->delete();
 
         session()->flash('alert-success', __('Success site delete'));

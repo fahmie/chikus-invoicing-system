@@ -32,7 +32,7 @@ class TaxTypeController extends Controller
         $tax_types = TaxType::paginate(15);
         }else{
         // Get Expense Categories by Company
-        $tax_types = TaxType::findByCompany($currentCompany->id)->paginate(15);
+        $tax_types = TaxType::findByCompany($currentCompany->id)->simplePaginate(15);
         }
 
         return view('application.settings.tax_type.index', [
@@ -65,7 +65,7 @@ class TaxTypeController extends Controller
         if(Auth::user()->roles =="superadmin"){
             $company = Company::all();
         }else{
-            $company = Company::where('id', $currentCompany->id)->paginate(15);
+            $company = Company::where('id', $currentCompany->id)->simplePaginate(15);
         }
 
         return view('application.settings.tax_type.create', [
@@ -120,7 +120,7 @@ class TaxTypeController extends Controller
         if(Auth::user()->roles =="superadmin"){
             $company = Company::all();
         }else{
-            $company = Company::where('id', $currentCompany->id)->paginate(15);
+            $company = Company::where('id', $currentCompany->id)->simplePaginate(15);
         }
  
         return view('application.settings.tax_type.edit', [

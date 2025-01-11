@@ -28,10 +28,10 @@ class ProductController extends Controller
 
         if(Auth::user()->roles =="superadmin"){
         // Get Expense Categories by Company
-        $product_units = ProductUnit::paginate(15);
+        $product_units = ProductUnit::simplePaginate(15);
         }else{
         // Get Product Units by Company
-        $product_units = ProductUnit::findByCompany($currentCompany->id)->paginate(15);
+        $product_units = ProductUnit::findByCompany($currentCompany->id)->simplePaginate(15);
         }
 
 

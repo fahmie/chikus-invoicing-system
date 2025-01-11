@@ -27,10 +27,10 @@ class EstimateController extends Controller
         $currentCompany = $user->currentCompany();
 
         // Query Estimates by Company and Tab
-        if($request->tab == 'all') {
+        if ($request->tab == 'all') {
             $query = Estimate::findByCompany($currentCompany->id)->orderBy('estimate_number');
             $tab = 'all';
-        } else if($request->tab == 'sent') {
+        } else if ($request->tab == 'sent') {
             $query = Estimate::findByCompany($currentCompany->id)->active()->orderBy('expiry_date');
             $tab = 'sent';
         } else {
@@ -45,7 +45,7 @@ class EstimateController extends Controller
                 AllowedFilter::scope('from'),
                 AllowedFilter::scope('to'),
             ])
-            ->paginate()
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('application.estimates.index', [
@@ -80,8 +80,8 @@ class EstimateController extends Controller
         // Also for filling form data and the ui
         $customers = $currentCompany->customers;
         $products = $currentCompany->products;
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
+        $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+        $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
 
         return view('application.estimates.create', [
             'estimate' => $estimate,
@@ -105,8 +105,8 @@ class EstimateController extends Controller
         $currentCompany = $user->currentCompany();
 
         // Get company based settings
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
+        $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+        $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
 
         // Save Estimate to Database
         $estimate = Estimate::create([
@@ -136,7 +136,7 @@ class EstimateController extends Controller
         $discounts = $request->discount;
 
         // Add products (estimate items)
-        for ($i=0; $i < count($products); $i++) {
+        for ($i = 0; $i < count($products); $i++) {
             $item = $estimate->items()->create([
                 'product_id' => $products[$i],
                 'company_id' => $currentCompany->id,
@@ -320,7 +320,7 @@ class EstimateController extends Controller
         $estimate->items()->delete();
 
         // Add products (estimate items)
-        for ($i=0; $i < count($products); $i++) {
+        for ($i = 0; $i < count($products); $i++) {
             $item = $estimate->items()->create([
                 'product_id' => $products[$i],
                 'company_id' => $currentCompany->id,

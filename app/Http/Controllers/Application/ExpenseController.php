@@ -24,7 +24,7 @@ class ExpenseController extends Controller
     {
         $user = $request->user();
         $currentCompany = $user->currentCompany();
- 
+
         // Get Expenses by Company
         $expenses = QueryBuilder::for(Expense::findByCompany($currentCompany->id))
             ->allowedFilters([
@@ -33,12 +33,12 @@ class ExpenseController extends Controller
                 AllowedFilter::scope('to'),
             ])
             ->oldest()
-            ->paginate()
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('application.expenses.index', [
             'expenses' => $expenses
-        ]); 
+        ]);
     }
 
     /**
@@ -66,8 +66,7 @@ class ExpenseController extends Controller
         return view('application.expenses.create', [
             'expense' => $expense,
             'vendors' => $vendors
-        ]); 
-        
+        ]);
     }
     public function create1(Request $request)
     {
@@ -87,8 +86,7 @@ class ExpenseController extends Controller
         return view('application.expenses.create1', [
             'expense' => $expense,
             'vendors' => $vendors
-        ]); 
-        
+        ]);
     }
     /**
      * Store the Expense in Database
@@ -155,7 +153,7 @@ class ExpenseController extends Controller
     public function update(Update $request)
     {
         $expense = Expense::findOrFail($request->expense);
-        
+
         // Update the Expense
         $expense->update([
             'expense_category_id' => $request->expense_category_id,
@@ -188,7 +186,7 @@ class ExpenseController extends Controller
 
         // Get receipt
         $receipt = $expense->getFirstMedia('receipt');
-       
+
         // Return the file if the receipt file is exist
         return $receipt
             ? response()->download($receipt->getPath(), $receipt->file_name)

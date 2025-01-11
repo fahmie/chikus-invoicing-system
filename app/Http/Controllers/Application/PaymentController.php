@@ -27,15 +27,15 @@ class PaymentController extends Controller
 
         // Get Payments by Company
         $payments = QueryBuilder::for(Payment::findByCompany($currentCompany->id))
-        ->allowedFilters([
-            AllowedFilter::partial('payment_number'),
-            AllowedFilter::exact('payment_method_id'),
-            AllowedFilter::scope('from'),
-            AllowedFilter::scope('to'),
-        ])
-        ->oldest()
-        ->paginate()
-        ->appends(request()->query());
+            ->allowedFilters([
+                AllowedFilter::partial('payment_number'),
+                AllowedFilter::exact('payment_method_id'),
+                AllowedFilter::scope('from'),
+                AllowedFilter::scope('to'),
+            ])
+            ->oldest()
+            ->simplePaginate(10)
+            ->appends(request()->query());
 
         return view('application.payments.index', [
             'payments' => $payments
@@ -71,7 +71,7 @@ class PaymentController extends Controller
             $invoice = Invoice::find($request->invoice);
 
             // Checking if invoice is exist
-            if($invoice) {
+            if ($invoice) {
                 $payment->invoice_id = $invoice->id;
                 $payment->customer_id = $invoice->customer_id;
                 $payment->amount = $invoice->due_amount;
@@ -83,7 +83,7 @@ class PaymentController extends Controller
         ]);
     }
 
-     /**
+    /**
      * Store the Payments in Database
      *
      * @param \App\Http\Requests\Application\Payment\Store $request
@@ -118,7 +118,7 @@ class PaymentController extends Controller
             $invoice->paid_status = Invoice::STATUS_PAID;
             $invoice->due_amount = 0;
 
-        // If it is partially paid then set status to partially paid
+            // If it is partially paid then set status to partially paid
         } else if ($invoice->due_amount != $payment->amount) {
             $invoice->due_amount = (int) $invoice->due_amount - (int)$payment->amount;
 

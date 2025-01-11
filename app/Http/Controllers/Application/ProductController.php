@@ -51,7 +51,7 @@ class ProductController extends Controller
             AllowedFilter::partial('unit_id'),
             AllowedFilter::partial('price'),
         ])
-        ->paginate(20)
+        ->simplePaginate(20)
         ->appends(request()->query());
 
         return view('application.products.index', [

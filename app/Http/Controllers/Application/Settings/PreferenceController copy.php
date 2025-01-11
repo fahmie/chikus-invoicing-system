@@ -21,7 +21,7 @@ class PreferenceController1 extends Controller
         {
             abort(403);
         }
-        $data['company'] = Company::paginate(5);
+        $data['company'] = Company::simplePaginate(5);
 
         return view('application.settings.preference.index', $data);
     }

@@ -29,14 +29,13 @@ class CompanyController extends Controller
         }
         $user = $request->user();
         $currentCompany = $user->currentCompany();
-        if(Auth::user()->roles =="superadmin")
-        {
-            $data['company'] = Company::paginate(5);
-        }else{
+        if (Auth::user()->roles == "superadmin") {
+            $data['company'] = Company::simplePaginate(5);
+        } else {
 
-            $data['company'] = Company::where('id', $currentCompany->id)->paginate(5);
+            $data['company'] = Company::where('id', $currentCompany->id)->simplePaginate(5);
         }
-        
+
 
         return view('application.settings.company.index', $data);
     }
@@ -60,14 +59,14 @@ class CompanyController extends Controller
     public function store(Request $request)
     {
         //dd($request);
-        
+
         if (!Auth::user()->can('setting-company-create')) {
             abort(403);
         }
 
         $request->validate([
             'name' => 'required|unique:companies',
-          ]);
+        ]);
 
         $user = $request->user();
         $currentCompany = $user->currentCompany();
@@ -84,47 +83,44 @@ class CompanyController extends Controller
         $address['model_id'] = $company_id->id;
         $address['name'] = $request->name;
         Address::create($address);
-        
+
         // Update Company Logo
-        
+
         if ($files = $request->file('avatar')) {
-            $destinationPath = 'storage/'.$company_id->id; // upload path
-             if(!File::isDirectory($destinationPath)){
- 
-                 File::makeDirectory($destinationPath, 0777, true, true);
-         
-             }
-             $extension = $files->extension();
-             $type = $files->getMimeType();
-             $size = $files->getSize();
-             $profileImage = $files->getClientOriginalName();
-             $files->move($destinationPath, '/'.$profileImage);
-             $input['avatar'] = $destinationPath.'/'.$profileImage;
-          
+            $destinationPath = 'storage/' . $company_id->id; // upload path
+            if (!File::isDirectory($destinationPath)) {
 
-          $media = new Media;
-          $media->id = $company_id->id;
-          $media->model_type = "App\Models\Company";
-          $media->model_id = $company_id->id;
-          $media->collection_name = "avatar";
-          $media->name = basename($profileImage, '.'.$extension);
-          $media->file_name = $profileImage;
-          $media->mime_type = $type;
-          $media->disk = "public";
-          $media->size = $size;
-          $media->order_column = 1;
-          $media->save();
+                File::makeDirectory($destinationPath, 0777, true, true);
+            }
+            $extension = $files->extension();
+            $type = $files->getMimeType();
+            $size = $files->getSize();
+            $profileImage = $files->getClientOriginalName();
+            $files->move($destinationPath, '/' . $profileImage);
+            $input['avatar'] = $destinationPath . '/' . $profileImage;
 
+
+            $media = new Media;
+            $media->id = $company_id->id;
+            $media->model_type = "App\Models\Company";
+            $media->model_id = $company_id->id;
+            $media->collection_name = "avatar";
+            $media->name = basename($profileImage, '.' . $extension);
+            $media->file_name = $profileImage;
+            $media->mime_type = $type;
+            $media->disk = "public";
+            $media->size = $size;
+            $media->order_column = 1;
+            $media->save();
         }
 
-          foreach($request->input('company_setting') as $key => $data)
-            {
-                $company_setting = new CompanySetting;
-                $company_setting->company_id = $company_id->id;
-                $company_setting->option = $key;
-                $company_setting->value = $data;
-                $company_setting->save();
-            }
+        foreach ($request->input('company_setting') as $key => $data) {
+            $company_setting = new CompanySetting;
+            $company_setting->company_id = $company_id->id;
+            $company_setting->option = $key;
+            $company_setting->value = $data;
+            $company_setting->save();
+        }
 
 
         session()->flash('alert-success', __('messages.company_updated'));
@@ -137,7 +133,7 @@ class CompanyController extends Controller
      * @param  \App\Models\Company  $company
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request,Company $company,$id)
+    public function edit(Request $request, Company $company, $id)
     {
         if (!Auth::user()->can('setting-company-edit')) {
             abort(403);
@@ -145,16 +141,15 @@ class CompanyController extends Controller
 
         $user = $request->user();
         $currentCompany = $user->currentCompany();
-        if(Auth::user()->roles =="superadmin")
-        {    
+        if (Auth::user()->roles == "superadmin") {
             $company = Company::FindorFail($id);
-        }else{
+        } else {
             $company = Company::FindorFail($currentCompany->id);
         }
 
-        return view('application.settings.company.edit_company',compact('company'));
+        return view('application.settings.company.edit_company', compact('company'));
     }
- 
+
     /**
      * Update the Company
      *
@@ -162,25 +157,25 @@ class CompanyController extends Controller
      * 
      * @return \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
      */
-    public function update(Update $request,$id)
+    public function update(Update $request, $id)
     {
-   // dd($request);
+        // dd($request);
 
         if (!Auth::user()->can('setting-company-edit')) {
             abort(403);
         }
 
         $request->validate([
-            'name' => 'required|unique:companies,name,'.$id,
-          ]);
+            'name' => 'required|unique:companies,name,' . $id,
+        ]);
 
         $user = $request->user();
         $currentCompany = $user->currentCompany();
 
         $company = Company::FindorFail($id);
         $company->update([
-             $company->name = $request->name,
-             $company->owner_id = $user->id,
+            $company->name = $request->name,
+            $company->owner_id = $user->id,
         ]);
 
         // Update Company Address
@@ -190,78 +185,74 @@ class CompanyController extends Controller
             $address->address_1 = $request['billing']['address_1'],
             $address->country_id = $request['billing']['country_id'],
             $address->city = $request['billing']['city'],
-            $address->state =$request['billing']['state'],
+            $address->state = $request['billing']['state'],
             $address->zip = $request['billing']['zip'],
             $address->phone = $request['billing']['phone'],
         ]);
 
-            if ($files = $request->file('avatar')) {
-                $destinationPath = 'storage/'.$id; // upload path
-                 if(!File::isDirectory($destinationPath)){
-     
-                     File::makeDirectory($destinationPath, 0777, true, true);
-             
-                 }
-                 $extension = $files->extension();
-                 $type = $files->getMimeType();
-                 $size = $files->getSize();
-                 $profileImage = $files->getClientOriginalName();
-                 $files->move($destinationPath, '/'.$profileImage);
-                 $input['avatar'] = $destinationPath.'/'.$profileImage;
+        if ($files = $request->file('avatar')) {
+            $destinationPath = 'storage/' . $id; // upload path
+            if (!File::isDirectory($destinationPath)) {
 
-               
-              $media = Media::where('model_id',$id)->first();
-              if(!empty($media)){
-              $media->update([
-                $media->model_type = "App\Models\Company",
-                $media->model_id = $id,
-                $media->collection_name = "avatar",
-                $media->name = basename($profileImage, '.'.$extension),
-                $media->file_name = $profileImage,
-                $media->mime_type = $type,
-                $media->disk = "public",
-                $media->size = $size,
-                $media->order_column = 1,
-              ]);
-              }else{
+                File::makeDirectory($destinationPath, 0777, true, true);
+            }
+            $extension = $files->extension();
+            $type = $files->getMimeType();
+            $size = $files->getSize();
+            $profileImage = $files->getClientOriginalName();
+            $files->move($destinationPath, '/' . $profileImage);
+            $input['avatar'] = $destinationPath . '/' . $profileImage;
+
+
+            $media = Media::where('model_id', $id)->first();
+            if (!empty($media)) {
+                $media->update([
+                    $media->model_type = "App\Models\Company",
+                    $media->model_id = $id,
+                    $media->collection_name = "avatar",
+                    $media->name = basename($profileImage, '.' . $extension),
+                    $media->file_name = $profileImage,
+                    $media->mime_type = $type,
+                    $media->disk = "public",
+                    $media->size = $size,
+                    $media->order_column = 1,
+                ]);
+            } else {
                 $media = new Media;
                 $media->id = $id;
                 $media->model_type = "App\Models\Company";
                 $media->model_id = $id;
                 $media->collection_name = "avatar";
-                $media->name = basename($profileImage, '.'.$extension);
+                $media->name = basename($profileImage, '.' . $extension);
                 $media->file_name = $profileImage;
                 $media->mime_type = $type;
                 $media->disk = "public";
                 $media->size = $size;
                 $media->order_column = 1;
                 $media->save();
-              }
-
-
             }
-            
-            $companysetting = CompanySetting::where('company_id', $id)->delete();
-          foreach($request->input('company_setting') as $key => $data)
-          {
-              $company_setting = new CompanySetting;
-              $company_setting->company_id = $id;
-              $company_setting->option = $key;
-              $company_setting->value = $data;
-              $company_setting->save();
-          }
+        }
+
+        $companysetting = CompanySetting::where('company_id', $id)->delete();
+        foreach ($request->input('company_setting') as $key => $data) {
+            $company_setting = new CompanySetting;
+            $company_setting->company_id = $id;
+            $company_setting->option = $key;
+            $company_setting->value = $data;
+            $company_setting->save();
+        }
 
         session()->flash('alert-success', __('messages.company_updated'));
         return redirect()->route('settings.company');
     }
 
 
-    public function destroy(Company $company,$id)
+    public function destroy(Company $company, $id)
     {
         if (!Auth::user()->can('setting-company-delete')) {
             abort(403);
         }
-        
+
         $company = Company::find($id)->delete();
 
         session()->flash('alert-success', __('Success site delete'));

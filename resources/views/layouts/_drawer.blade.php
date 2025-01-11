@@ -6,11 +6,12 @@
         position: absolute;
         bottom: 0;
     }
+
     @media screen and (max-width: 414px) {
-        .footer-bottom{
+        .footer-bottom {
             display: none;
         }
-    } 
+    }
 </style>
 <div class="mdk-drawer js-mdk-drawer" id="default-drawer" data-align="start" data-position="left">
     <div class="mdk-drawer__scrim"></div>
@@ -126,7 +127,7 @@
                                         <span class="sidebar-menu-text">Completed Delivery</span>
                                     </a>
                                 </li>
-                                @endif 
+                                @endif
                                 @if(Auth::user()->can('supplier-view') || Auth::user()->can('product-inventory-view'))
                                 <li class="sidebar-menu-item {{ $page == 'inventory_setting' ? 'active' : ''}}">
                                     <a class="sidebar-menu-button" href="{{ route('supplier.index') }}">
@@ -134,7 +135,7 @@
                                         <span class="sidebar-menu-text">Inventory Settings</span>
                                     </a>
                                 </li>
-                                @endif 
+                                @endif
                                 @if(Auth::user()->can('inventory-management-view'))
                                 <li class="sidebar-menu-item {{ $page == 'inventory_management' ? 'active' : ''}}">
                                     <a class="sidebar-menu-button" href="{{ route('managements.index') }}">
@@ -142,34 +143,34 @@
                                         <span class="sidebar-menu-text">Inventory Managements</span>
                                     </a>
                                 </li>
-                                @endif 
-                            @if(Auth::user()->roles =="superadmin" || Auth::user()->roles =="admin_company" || Auth::user()->roles =="admin")
+                                @endif
+                                @if(Auth::user()->roles =="superadmin" || Auth::user()->roles =="admin_company" || Auth::user()->roles =="admin")
                                 <li class="sidebar-menu-item {{ $page == 'settings' ? 'active' : ''}}">
                                     <a class="sidebar-menu-button" href="{{ route('settings.account') }}">
                                         <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">settings</i>
                                         <span class="sidebar-menu-text">{{ __('messages.settings') }}</span>
                                     </a>
                                 </li>
-                            @endif
-                            
-                            <li class="sidebar-menu-item">
-                                <a class="sidebar-menu-button" href="{{ route('logout') }}">
-                                    <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">lock_open</i>
-                                    <span class="sidebar-menu-text">{{ __('messages.logout') }}</span>
-                                </a>
-                            </li>
+                                @endif
+
+                                <li class="sidebar-menu-item">
+                                    <a class="sidebar-menu-button" href="{{ route('logout') }}">
+                                        <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">lock_open</i>
+                                        <span class="sidebar-menu-text">{{ __('messages.logout') }}</span>
+                                    </a>
+                                </li>
                             </ul>
                             <div class="footer-bottom">
                                 <div class="container">
                                     <div class="row">
                                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center" style=" color: #939FAD">
-                                                Powered by © Cara
+                                            Powered by © AmzarTech
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
                 <div class="simplebar-placeholder"></div>
@@ -177,4 +178,3 @@
         </div>
     </div>
 </div>
-

@@ -31,12 +31,12 @@ class TeamController extends Controller
         $currentSites = Auth::user()->sites_id;
 
         if(Auth::user()->roles =="superadmin"){
-            $users = User::where('client_id', null)->paginate(10);
+            $users = User::where('client_id', null)->simplePaginate(10);
         }elseif(Auth::user()->roles =="admin_company"){
             $sitebycompany = Site::select('id')->where('company_id', $currentCompany->id)->get();
-            $users = User::whereIn('sites_id',$sitebycompany)->where('client_id', null)->paginate(10);
+            $users = User::whereIn('sites_id',$sitebycompany)->where('client_id', null)->simplePaginate(10);
         }else {
-            $users = User::where('sites_id',$currentSites)->where('client_id', null)->paginate(10);
+            $users = User::where('sites_id',$currentSites)->where('client_id', null)->simplePaginate(10);
         }
 
         return view('application.settings.team.index',compact('users'));

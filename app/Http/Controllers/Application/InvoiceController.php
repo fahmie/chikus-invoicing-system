@@ -41,52 +41,50 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        
+
         if (!Auth::user()->can('invoices-view')) {
             abort(403);
         }
         $user = $request->user();
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
-        
+
         // Query Invoices by Company and Tab
-        if(Auth::user()->roles =="superadmin")
-        {
+        if (Auth::user()->roles == "superadmin") {
             $sites = Site::all();
-            if($request->tab == 'all') {
+            if ($request->tab == 'all') {
                 // $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', 'PAID')->latest('updated_at');
                 $query = Invoice::where('paid_status', 'PAID')->latest('updated_at', 'DESC');
                 $tab = 'all';
-            } else{
+            } else {
                 // $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', '!=','PAID')->latest('updated_at');
-                $query = Invoice::where('paid_status', '!=','PAID')->latest('updated_at', 'DESC');
+                $query = Invoice::where('paid_status', '!=', 'PAID')->latest('updated_at', 'DESC');
                 $tab = 'due';
             }
-
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $sites = Site::where('company_id', $currentCompany->id)->get();
-            if($request->tab == 'all') {
+            if ($request->tab == 'all') {
                 // $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', 'PAID')->latest('updated_at');
                 $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', 'PAID')->latest('updated_at', 'DESC');
                 $tab = 'all';
-            } else{
+            } else {
                 // $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', '!=','PAID')->latest('updated_at');
-                $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', '!=','PAID')->latest('updated_at', 'DESC');
+                $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', '!=', 'PAID')->latest('updated_at', 'DESC');
                 $tab = 'due';
             }
-        }else {
-            $sites = Site::where('id',$currentSites)->get();
-            if($request->tab == 'all') {
+        } else {
+            $sites = Site::where('id', $currentSites)->get();
+            if ($request->tab == 'all') {
                 // $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', 'PAID')->latest('updated_at');
                 $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->where('paid_status', 'PAID')->latest('updated_at', 'DESC');
                 $tab = 'all';
-            } else{
+            } else {
                 // $query = Invoice::findByCompany($currentCompany->id)->where('paid_status', '!=','PAID')->latest('updated_at');
-                $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->where('paid_status', '!=','PAID')->latest('updated_at', 'DESC');
+                $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->where('paid_status', '!=', 'PAID')->latest('updated_at', 'DESC');
                 $tab = 'due';
             }
         }
-        
+
 
         // Apply Filters and Paginate
         $invoices = QueryBuilder::for($query)
@@ -100,7 +98,7 @@ class InvoiceController extends Controller
                 AllowedFilter::partial('status'),
 
             ])
-            ->paginate(10)
+            ->simplePaginate(10)
             ->appends(request()->query());
 
 
@@ -122,27 +120,27 @@ class InvoiceController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
         // Query Invoices by Company and Tab
-        if(Auth::user()->roles =="superadmin"){
-            if($request->tab == 'all') {
+        if (Auth::user()->roles == "superadmin") {
+            if ($request->tab == 'all') {
                 $query = Invoice::where('status', 'COMPLETED')->latest('updated_at');
                 $tab = 'all';
-            } else{
+            } else {
                 $query = Invoice::where('status', 'OTW')->latest('updated_at');
                 $tab = 'due';
             }
-        }elseif(Auth::user()->roles =="admin_company"){
-            if($request->tab == 'all') {
+        } elseif (Auth::user()->roles == "admin_company") {
+            if ($request->tab == 'all') {
                 $query = Invoice::findByCompany($currentCompany->id)->where('status', 'COMPLETED')->latest('updated_at');
                 $tab = 'all';
-            } else{
+            } else {
                 $query = Invoice::findByCompany($currentCompany->id)->where('status', 'OTW')->latest('updated_at');
                 $tab = 'due';
             }
-        }else {
-            if($request->tab == 'all') {
+        } else {
+            if ($request->tab == 'all') {
                 $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->where('status', 'COMPLETED')->latest('updated_at');
                 $tab = 'all';
-            } else{
+            } else {
                 $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->where('status', 'OTW')->latest('updated_at');
                 $tab = 'due';
             }
@@ -162,7 +160,7 @@ class InvoiceController extends Controller
                 AllowedFilter::partial('platenumbers.number_plate'),
                 AllowedFilter::partial('clients.company_name'),
             ])
-            ->paginate(10)
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('application.invoices.indexdo', [
@@ -180,25 +178,12 @@ class InvoiceController extends Controller
         $currentCompany = $user->currentCompany();
         $currentSites = $user->sites_id;
 
-        if(Auth::user()->roles =="superadmin"){
-        // Query Invoices by Company and Tab
-        if($request->tab == 'all') {
-            $query = Invoice::findByCompany($currentCompany->id)->orderBy('created_at', 'desc');
-            $tab = 'all';
-        } else if($request->tab == 'contract') {
-            // $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->where('paid_status','UNPAID')->orderBy('created_at', 'desc');
-            $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->latest('updated_at');
-            $tab = 'contract';
-        } else {
-            $query = Invoice::findByCompany($currentCompany->id)->whereNull('client_id')->latest('updated_at');
-            $tab = 'cash';
-        }
-
-        }elseif(Auth::user()->roles =="admin_company"){
-            if($request->tab == 'all') {
+        if (Auth::user()->roles == "superadmin") {
+            // Query Invoices by Company and Tab
+            if ($request->tab == 'all') {
                 $query = Invoice::findByCompany($currentCompany->id)->orderBy('created_at', 'desc');
                 $tab = 'all';
-            } else if($request->tab == 'contract') {
+            } else if ($request->tab == 'contract') {
                 // $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->where('paid_status','UNPAID')->orderBy('created_at', 'desc');
                 $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->latest('updated_at');
                 $tab = 'contract';
@@ -206,12 +191,24 @@ class InvoiceController extends Controller
                 $query = Invoice::findByCompany($currentCompany->id)->whereNull('client_id')->latest('updated_at');
                 $tab = 'cash';
             }
-        }else {
+        } elseif (Auth::user()->roles == "admin_company") {
+            if ($request->tab == 'all') {
+                $query = Invoice::findByCompany($currentCompany->id)->orderBy('created_at', 'desc');
+                $tab = 'all';
+            } else if ($request->tab == 'contract') {
+                // $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->where('paid_status','UNPAID')->orderBy('created_at', 'desc');
+                $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->latest('updated_at');
+                $tab = 'contract';
+            } else {
+                $query = Invoice::findByCompany($currentCompany->id)->whereNull('client_id')->latest('updated_at');
+                $tab = 'cash';
+            }
+        } else {
 
-            if($request->tab == 'all') {
+            if ($request->tab == 'all') {
                 $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->orderBy('created_at', 'desc');
                 $tab = 'all';
-            } else if($request->tab == 'contract') {
+            } else if ($request->tab == 'contract') {
                 // $query = Invoice::findByCompany($currentCompany->id)->whereNotNull('client_id')->where('paid_status','UNPAID')->orderBy('created_at', 'desc');
                 $query = Invoice::findByCompany($currentCompany->id)->findBySite($currentSites)->whereNotNull('client_id')->latest('updated_at');
                 $tab = 'contract';
@@ -234,7 +231,7 @@ class InvoiceController extends Controller
                 AllowedFilter::partial('clients.company_name'),
                 AllowedFilter::partial('status'),
             ])
-            ->paginate(10)
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('application.invoices.indexreceipts', [
@@ -249,45 +246,44 @@ class InvoiceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request, $id=NULL) //create invoice for contract
+    public function create(Request $request, $id = NULL) //create invoice for contract
     {
         //dd($id);
         if (!Auth::user()->can('invoices-create')) {
             abort(403);
         }
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $user = $request->user();
             $currentCompany = $user->currentCompany();
             $currentSites = $id;
-
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $user = $request->user();
             $currentCompany = $user->currentCompany();
             $currentSites = $id;
-        }else {
+        } else {
             $user = $request->user();
             $currentCompany = $user->currentCompany();
             $currentSites = $user->sites_id;
         }
 
-        $active_driver = Invoice::where('status', 'OTW')->where('sites_id',$currentSites)->get();
+        $active_driver = Invoice::where('status', 'OTW')->where('sites_id', $currentSites)->get();
         $active[] = array();
-        foreach($active_driver as $data){
+        foreach ($active_driver as $data) {
             $active[] = $data->driver_id;
         }
-       // dd($currentSites);
+        // dd($currentSites);
         $active1 = array_filter($active);
         // dd($active1);
 
-        $client = Client::where('sites_id',$currentSites)->get();
-        $drivers = Driver::where('sites_id',$currentSites)->get();
-        $products = Product::where('sites_id',$currentSites)->get();
-        $transporter = Transporter::where('sites_id',$currentSites)->get();
-    
+        $client = Client::where('sites_id', $currentSites)->get();
+        $drivers = Driver::where('sites_id', $currentSites)->get();
+        $products = Product::where('sites_id', $currentSites)->get();
+        $transporter = Transporter::where('sites_id', $currentSites)->get();
+
 
         // Get next Invoice number if the auto generation option is enabled
         $invoice_prefix = $currentCompany->getSetting('invoice_prefix');
-        $next_invoice_number = Invoice::getNextInvoiceNumber($invoice_prefix,$currentSites);
+        $next_invoice_number = Invoice::getNextInvoiceNumber($invoice_prefix, $currentSites);
 
         // Create new number model and set invoice_number and company_id
         // so that we can use them in the form
@@ -297,10 +293,10 @@ class InvoiceController extends Controller
 
         // Also for filling form data and the ui
         $customers = $currentCompany->customers;
-       // $products = $currentCompany->products;
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
-        
+        // $products = $currentCompany->products;
+        $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+        $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
+
         return view('application.invoices.create', [
             'invoice' => $invoice,
             'customers' => $customers,
@@ -315,7 +311,7 @@ class InvoiceController extends Controller
     }
 
     public function createreceipt(Request $request)
-    { 
+    {
         if (!Auth::user()->can('receipts-create')) {
             abort(403);
         }
@@ -333,8 +329,7 @@ class InvoiceController extends Controller
 
     public function filterbyclient(Request $request)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             abort(403);
         }
         $client = Client::all();
@@ -349,14 +344,11 @@ class InvoiceController extends Controller
             'invoices' => $invoices,
             'payment_status' => $payment_status,
         ]);
-        
-    
     }
 
-    public function filterbyclient1(Request $request,$id)
+    public function filterbyclient1(Request $request, $id)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             abort(403);
         }
         $data['client'] = Client::all();
@@ -374,39 +366,36 @@ class InvoiceController extends Controller
         // ]);
 
         return redirect()->route('application.invoices.createreceipts', $data);
-    
     }
 
-    public function createcash(Request $request, $id=NULL)
+    public function createcash(Request $request, $id = NULL)
     {
         if (!Auth::user()->can('invoices-create')) {
             abort(403);
         }
-        if(Auth::user()->roles =="superadmin"){
+        if (Auth::user()->roles == "superadmin") {
             $user = $request->user();
             $currentCompany = $user->currentCompany();
             $currentSites = $id;
-
-        }elseif(Auth::user()->roles =="admin_company"){
+        } elseif (Auth::user()->roles == "admin_company") {
             $user = $request->user();
             $currentCompany = $user->currentCompany();
             $currentSites = $user->sites_id;
-
-        }else {
+        } else {
             $user = $request->user();
             $currentCompany = $user->currentCompany();
             $currentSites = $user->sites_id;
         }
-            // dd($currentSites);
+        // dd($currentSites);
 
-            $drivers = Driver::where('sites_id', $currentSites)->get();
-            $plate_num = $drivers;
-            $products = Product::where('client_id', NULL)->where('sites_id', $currentSites)->get();
-        
+        $drivers = Driver::where('sites_id', $currentSites)->get();
+        $plate_num = $drivers;
+        $products = Product::where('client_id', NULL)->where('sites_id', $currentSites)->get();
+
 
         // Get next Invoice number if the auto generation option is enabled
         $invoice_prefix = $currentCompany->getSetting('invoice_prefix');
-        $next_invoice_number = Invoice::getNextInvoiceNumber($invoice_prefix,$currentSites);
+        $next_invoice_number = Invoice::getNextInvoiceNumber($invoice_prefix, $currentSites);
         // Create new number model and set invoice_number and company_id
         // so that we can use them in the form
         $invoice = new Invoice();
@@ -415,9 +404,9 @@ class InvoiceController extends Controller
 
         // Also for filling form data and the ui
         $customers = $currentCompany->customers;
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
-        
+        $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+        $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
+
         return view('application.invoices.createcash', [
             'invoice' => $invoice,
             'customers' => $customers,
@@ -441,8 +430,8 @@ class InvoiceController extends Controller
         if (!Auth::user()->can('invoices-create')) {
             abort(403);
         }
-        if($request->transporter == 2){
-         
+        if ($request->transporter == 2) {
+
             $request->validate([
                 'client_id' => 'required',
                 'driver_id' => 'required',
@@ -451,8 +440,7 @@ class InvoiceController extends Controller
                 'transporter_id' => 'required',
                 'location_id' => 'required',
             ]);
-
-        }else{
+        } else {
 
             $request->validate([
                 'client_id' => 'required',
@@ -464,230 +452,230 @@ class InvoiceController extends Controller
 
         $site = Client::where('id', $request->client_id)->first();
 
-       if(!empty($request->transporter_id)){
+        if (!empty($request->transporter_id)) {
 
-        $invoice_num = preg_replace("/[^\d]/", "", $request->invoice_number);
-        //dd($invoice_num);
-        $date =date('dmY');
-        $invoice_number = "INV-CT-".$date.'/'.$invoice_num;
-        $do_number = "DO-CT-".$date.'/'.$invoice_num;
-        //$rc_number = "REC-CT-".$invoice_num;
-        //dd($do_number);
-        if($request->drafs_input == 1){
-            $status = Invoice::STATUS_SENT;
-            $paid_status = Invoice::STATUS_UNPAID;
-        }else{
-            $status = Invoice::STATUS_DRAFT;
-            $paid_status = Invoice::STATUS_UNPAID;
-        }
-        $user = $request->user();
-        $currentCompany = $user->currentCompany();
+            $invoice_num = preg_replace("/[^\d]/", "", $request->invoice_number);
+            //dd($invoice_num);
+            $date = date('dmY');
+            $invoice_number = "INV-CT-" . $date . '/' . $invoice_num;
+            $do_number = "DO-CT-" . $date . '/' . $invoice_num;
+            //$rc_number = "REC-CT-".$invoice_num;
+            //dd($do_number);
+            if ($request->drafs_input == 1) {
+                $status = Invoice::STATUS_SENT;
+                $paid_status = Invoice::STATUS_UNPAID;
+            } else {
+                $status = Invoice::STATUS_DRAFT;
+                $paid_status = Invoice::STATUS_UNPAID;
+            }
+            $user = $request->user();
+            $currentCompany = $user->currentCompany();
 
-        // Get company based settings
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
-        $sites = Site::where('id',$site->sites_id)->first();
+            // Get company based settings
+            $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+            $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
+            $sites = Site::where('id', $site->sites_id)->first();
 
-        $invoice = new Invoice;
-        $invoice->type = 1;
-        $invoice->invoice_date = $request->invoice_date;
-        $invoice->due_date = $request->due_date;
-        $invoice->invoice_number = $invoice_number;
-        $invoice->do_number = $do_number;
-        $invoice->plate_number_id = $request->plate_number_id;
-        $invoice->plate_number = $request->plate_number;
-        $invoice->reference_number = $request->reference_number;
-        $invoice->driver_id = $request->driver_id;
-        $invoice->client_id = $request->client_id;
-        $invoice->sites_id  = $site->sites_id;
-        $invoice->customer_id = $request->customer_id;
-        $invoice->company_id = $sites->company_id;
-        $invoice->transporter_id = $request->transporter_id;
-        $invoice->location_id = $request->location_id;
-        $invoice->status = $status;
-        $invoice->paid_status = $paid_status;
-        $invoice->sub_total = $request->sub_total;
-        $invoice->discount_type = 'percent';
-        $invoice->discount_val = $request->total_discount ?? 0;
-        $invoice->total = $request->grand_total;
-        $invoice->due_amount = $request->grand_total;
-        $invoice->accurate_amount = $request->grand_total;
-        $invoice->notes = $request->notes;
-        $invoice->private_notes = $request->private_notes;
-        $invoice->tax_per_item = $tax_per_item;
-        $invoice->discount_per_item = $discount_per_item;
-        $invoice->save();
+            $invoice = new Invoice;
+            $invoice->type = 1;
+            $invoice->invoice_date = $request->invoice_date;
+            $invoice->due_date = $request->due_date;
+            $invoice->invoice_number = $invoice_number;
+            $invoice->do_number = $do_number;
+            $invoice->plate_number_id = $request->plate_number_id;
+            $invoice->plate_number = $request->plate_number;
+            $invoice->reference_number = $request->reference_number;
+            $invoice->driver_id = $request->driver_id;
+            $invoice->client_id = $request->client_id;
+            $invoice->sites_id  = $site->sites_id;
+            $invoice->customer_id = $request->customer_id;
+            $invoice->company_id = $sites->company_id;
+            $invoice->transporter_id = $request->transporter_id;
+            $invoice->location_id = $request->location_id;
+            $invoice->status = $status;
+            $invoice->paid_status = $paid_status;
+            $invoice->sub_total = $request->sub_total;
+            $invoice->discount_type = 'percent';
+            $invoice->discount_val = $request->total_discount ?? 0;
+            $invoice->total = $request->grand_total;
+            $invoice->due_amount = $request->grand_total;
+            $invoice->accurate_amount = $request->grand_total;
+            $invoice->notes = $request->notes;
+            $invoice->private_notes = $request->private_notes;
+            $invoice->tax_per_item = $tax_per_item;
+            $invoice->discount_per_item = $discount_per_item;
+            $invoice->save();
 
-        $invoice_id = Invoice::where('invoice_number', $invoice_number)->first();
-        $trackinginfo = new Trackinginfo;
-        $trackinginfo->invoice_id = $invoice_id->id;
-        $trackinginfo->activities = "Pick up by";
-        $trackinginfo->remark = $invoice_id->driver_id;
-        $trackinginfo->plate_number_id = $request->plate_number_id;
-        $trackinginfo->save();
+            $invoice_id = Invoice::where('invoice_number', $invoice_number)->first();
+            $trackinginfo = new Trackinginfo;
+            $trackinginfo->invoice_id = $invoice_id->id;
+            $trackinginfo->activities = "Pick up by";
+            $trackinginfo->remark = $invoice_id->driver_id;
+            $trackinginfo->plate_number_id = $request->plate_number_id;
+            $trackinginfo->save();
 
-        $trackinginfo = new Trackinginfo;
-        $trackinginfo->invoice_id = $invoice_id->id;
-        $trackinginfo->activities = "Invoice Number";
-        $trackinginfo->remark = $invoice_number;
-        $trackinginfo->save();
+            $trackinginfo = new Trackinginfo;
+            $trackinginfo->invoice_id = $invoice_id->id;
+            $trackinginfo->activities = "Invoice Number";
+            $trackinginfo->remark = $invoice_number;
+            $trackinginfo->save();
 
-        $trackinginfo = new Trackinginfo;
-        $trackinginfo->invoice_id = $invoice_id->id;
-        $trackinginfo->activities = "DO Number";
-        $trackinginfo->remark = $do_number;
-        $trackinginfo->save();
+            $trackinginfo = new Trackinginfo;
+            $trackinginfo->invoice_id = $invoice_id->id;
+            $trackinginfo->activities = "DO Number";
+            $trackinginfo->remark = $do_number;
+            $trackinginfo->save();
 
-        // Arrays of data for storing Invoice Items
-        $products = $request->product;
-        $quantities = $request->quantity;
-        $taxes = $request->taxes;
-        $prices = $request->price;
-        $totals = $request->total;
-        $discounts = $request->discount;
+            // Arrays of data for storing Invoice Items
+            $products = $request->product;
+            $quantities = $request->quantity;
+            $taxes = $request->taxes;
+            $prices = $request->price;
+            $totals = $request->total;
+            $discounts = $request->discount;
 
-        // Add products (invoice items)
-        for ($i=0; $i < count($products); $i++) {
-            $item = $invoice->items()->create([
-                'product_id' => $products[$i],
-                'company_id' => $sites->company_id,
-                'quantity' => $quantities[$i],
-                'discount_type' => 'percent',
-                'discount_val' => $discounts[$i] ?? 0,
-                'price' => $prices[$i],
-                'total' => $totals[$i],
-            ]);
+            // Add products (invoice items)
+            for ($i = 0; $i < count($products); $i++) {
+                $item = $invoice->items()->create([
+                    'product_id' => $products[$i],
+                    'company_id' => $sites->company_id,
+                    'quantity' => $quantities[$i],
+                    'discount_type' => 'percent',
+                    'discount_val' => $discounts[$i] ?? 0,
+                    'price' => $prices[$i],
+                    'total' => $totals[$i],
+                ]);
 
-            // Add taxes for Invoice Item if it is given
-            if ($taxes && array_key_exists($i, $taxes)) {
-                foreach ($taxes[$i] as $tax) {
-                    $item->taxes()->create([
+                // Add taxes for Invoice Item if it is given
+                if ($taxes && array_key_exists($i, $taxes)) {
+                    foreach ($taxes[$i] as $tax) {
+                        $item->taxes()->create([
+                            'tax_type_id' => $tax
+                        ]);
+                    }
+                }
+            }
+
+            // If Invoice based taxes are given
+            if ($request->has('total_taxes')) {
+                foreach ($request->total_taxes as $tax) {
+                    $invoice->taxes()->create([
+                        'tax_type_id' => $tax
+                    ]);
+                }
+            }
+        } else {
+            $invoice_num = preg_replace("/[^\d]/", "", $request->invoice_number);
+            //dd($invoice_num);
+            $date = date('dmY');
+            $invoice_number = "INV-CT-" . $date . '/' . $invoice_num;
+            $do_number = "DO-CT-" . $date . '/' . $invoice_num;
+            //$rc_number = "REC-CT-".$invoice_num;
+            //dd($do_number);
+            if ($request->drafs_input == 1) {
+                $status = Invoice::STATUS_COMPLETED;
+                $paid_status = Invoice::STATUS_UNPAID;
+            } else {
+                $status = Invoice::STATUS_DRAFT;
+                $paid_status = Invoice::STATUS_UNPAID;
+            }
+            $user = $request->user();
+            $currentCompany = $user->currentCompany();
+
+            // Get company based settings
+            $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+            $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
+            $sites = Site::where('id', $site->sites_id)->first();
+
+            $invoice = new Invoice;
+            $invoice->type = 1;
+            $invoice->invoice_date = $request->invoice_date;
+            $invoice->due_date = $request->due_date;
+            $invoice->invoice_number = $invoice_number;
+            $invoice->do_number = $do_number;
+            $invoice->plate_number_id = $request->plate_number_id;
+            $invoice->plate_number = $request->plate_number;
+            $invoice->reference_number = $request->reference_number;
+            $invoice->driver_id = $request->driver_id;
+            $invoice->client_id = $request->client_id;
+            $invoice->sites_id  = $site->sites_id;
+            $invoice->customer_id = $request->customer_id;
+            $invoice->company_id = $sites->company_id;
+            $invoice->transporter_id = $request->transporter_id;
+            $invoice->location_id = $request->location_id;
+            $invoice->status = $status;
+            $invoice->paid_status = $paid_status;
+            $invoice->sub_total = $request->sub_total;
+            $invoice->discount_type = 'percent';
+            $invoice->discount_val = $request->total_discount ?? 0;
+            $invoice->total = $request->grand_total;
+            $invoice->due_amount = $request->grand_total;
+            $invoice->accurate_amount = $request->grand_total;
+            $invoice->notes = $request->notes;
+            $invoice->private_notes = $request->private_notes;
+            $invoice->tax_per_item = $tax_per_item;
+            $invoice->discount_per_item = $discount_per_item;
+            $invoice->save();
+
+            $invoice_id = Invoice::where('invoice_number', $invoice_number)->first();
+            $trackinginfo = new Trackinginfo;
+            $trackinginfo->invoice_id = $invoice_id->id;
+            $trackinginfo->activities = "Pick up by";
+            $trackinginfo->remark = $invoice_id->driver_id;
+            $trackinginfo->plate_number_id = $request->plate_number_id;
+            $trackinginfo->save();
+
+            $trackinginfo = new Trackinginfo;
+            $trackinginfo->invoice_id = $invoice_id->id;
+            $trackinginfo->activities = "Invoice Number";
+            $trackinginfo->remark = $invoice_number;
+            $trackinginfo->save();
+
+            $trackinginfo = new Trackinginfo;
+            $trackinginfo->invoice_id = $invoice_id->id;
+            $trackinginfo->activities = "DO Number";
+            $trackinginfo->remark = $do_number;
+            $trackinginfo->save();
+
+            // Arrays of data for storing Invoice Items
+            $products = $request->product;
+            $quantities = $request->quantity;
+            $taxes = $request->taxes;
+            $prices = $request->price;
+            $totals = $request->total;
+            $discounts = $request->discount;
+
+            // Add products (invoice items)
+            for ($i = 0; $i < count($products); $i++) {
+                $item = $invoice->items()->create([
+                    'product_id' => $products[$i],
+                    'company_id' => $sites->company_id,
+                    'quantity' => $quantities[$i],
+                    'discount_type' => 'percent',
+                    'discount_val' => $discounts[$i] ?? 0,
+                    'price' => $prices[$i],
+                    'total' => $totals[$i],
+                ]);
+
+                // Add taxes for Invoice Item if it is given
+                if ($taxes && array_key_exists($i, $taxes)) {
+                    foreach ($taxes[$i] as $tax) {
+                        $item->taxes()->create([
+                            'tax_type_id' => $tax
+                        ]);
+                    }
+                }
+            }
+
+            // If Invoice based taxes are given
+            if ($request->has('total_taxes')) {
+                foreach ($request->total_taxes as $tax) {
+                    $invoice->taxes()->create([
                         'tax_type_id' => $tax
                     ]);
                 }
             }
         }
-
-        // If Invoice based taxes are given
-        if ($request->has('total_taxes')) {
-            foreach ($request->total_taxes as $tax) {
-                $invoice->taxes()->create([
-                    'tax_type_id' => $tax
-                ]);
-            }
-        }
-       }else{
-        $invoice_num = preg_replace("/[^\d]/", "", $request->invoice_number);
-        //dd($invoice_num);
-        $date =date('dmY');
-        $invoice_number = "INV-CT-".$date.'/'.$invoice_num;
-        $do_number = "DO-CT-".$date.'/'.$invoice_num;
-        //$rc_number = "REC-CT-".$invoice_num;
-        //dd($do_number);
-        if($request->drafs_input == 1){
-            $status = Invoice::STATUS_COMPLETED;
-            $paid_status = Invoice::STATUS_UNPAID;
-        }else{
-            $status = Invoice::STATUS_DRAFT;
-            $paid_status = Invoice::STATUS_UNPAID;
-        }
-        $user = $request->user();
-        $currentCompany = $user->currentCompany();
-
-        // Get company based settings
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
-        $sites = Site::where('id',$site->sites_id)->first();
-
-        $invoice = new Invoice;
-        $invoice->type = 1;
-        $invoice->invoice_date = $request->invoice_date;
-        $invoice->due_date = $request->due_date;
-        $invoice->invoice_number = $invoice_number;
-        $invoice->do_number = $do_number;
-        $invoice->plate_number_id = $request->plate_number_id;
-        $invoice->plate_number = $request->plate_number;
-        $invoice->reference_number = $request->reference_number;
-        $invoice->driver_id = $request->driver_id;
-        $invoice->client_id = $request->client_id;
-        $invoice->sites_id  = $site->sites_id;
-        $invoice->customer_id = $request->customer_id;
-        $invoice->company_id = $sites->company_id;
-        $invoice->transporter_id = $request->transporter_id;
-        $invoice->location_id = $request->location_id;
-        $invoice->status = $status;
-        $invoice->paid_status = $paid_status;
-        $invoice->sub_total = $request->sub_total;
-        $invoice->discount_type = 'percent';
-        $invoice->discount_val = $request->total_discount ?? 0;
-        $invoice->total = $request->grand_total;
-        $invoice->due_amount = $request->grand_total;
-        $invoice->accurate_amount = $request->grand_total;
-        $invoice->notes = $request->notes;
-        $invoice->private_notes = $request->private_notes;
-        $invoice->tax_per_item = $tax_per_item;
-        $invoice->discount_per_item = $discount_per_item;
-        $invoice->save();
-
-        $invoice_id = Invoice::where('invoice_number', $invoice_number)->first();
-        $trackinginfo = new Trackinginfo;
-        $trackinginfo->invoice_id = $invoice_id->id;
-        $trackinginfo->activities = "Pick up by";
-        $trackinginfo->remark = $invoice_id->driver_id;
-        $trackinginfo->plate_number_id = $request->plate_number_id;
-        $trackinginfo->save();
-
-        $trackinginfo = new Trackinginfo;
-        $trackinginfo->invoice_id = $invoice_id->id;
-        $trackinginfo->activities = "Invoice Number";
-        $trackinginfo->remark = $invoice_number;
-        $trackinginfo->save();
-
-        $trackinginfo = new Trackinginfo;
-        $trackinginfo->invoice_id = $invoice_id->id;
-        $trackinginfo->activities = "DO Number";
-        $trackinginfo->remark = $do_number;
-        $trackinginfo->save();
-
-        // Arrays of data for storing Invoice Items
-        $products = $request->product;
-        $quantities = $request->quantity;
-        $taxes = $request->taxes;
-        $prices = $request->price;
-        $totals = $request->total;
-        $discounts = $request->discount;
-
-        // Add products (invoice items)
-        for ($i=0; $i < count($products); $i++) {
-            $item = $invoice->items()->create([
-                'product_id' => $products[$i],
-                'company_id' => $sites->company_id,
-                'quantity' => $quantities[$i],
-                'discount_type' => 'percent',
-                'discount_val' => $discounts[$i] ?? 0,
-                'price' => $prices[$i],
-                'total' => $totals[$i],
-            ]);
-
-            // Add taxes for Invoice Item if it is given
-            if ($taxes && array_key_exists($i, $taxes)) {
-                foreach ($taxes[$i] as $tax) {
-                    $item->taxes()->create([
-                        'tax_type_id' => $tax
-                    ]);
-                }
-            }
-        }
-
-        // If Invoice based taxes are given
-        if ($request->has('total_taxes')) {
-            foreach ($request->total_taxes as $tax) {
-                $invoice->taxes()->create([
-                    'tax_type_id' => $tax
-                ]);
-            }
-        }
-       }
 
         session()->flash('alert-success', __('messages.invoice_added'));
         return redirect()->route('invoices.details', $invoice->id);
@@ -700,15 +688,15 @@ class InvoiceController extends Controller
         }
         $invoice_num = preg_replace("/[^\d]/", "", $request->invoice_number);
         //dd($invoice_num);
-        $date =date("dmY");
-        $invoice_number = "INV-CS-".$date.'/'.$invoice_num;
-        $do_number = "DO-CS-".$date.'/'.$invoice_num;
-        $rc_number = "REC-CS-".$date.'/'.$invoice_num;
+        $date = date("dmY");
+        $invoice_number = "INV-CS-" . $date . '/' . $invoice_num;
+        $do_number = "DO-CS-" . $date . '/' . $invoice_num;
+        $rc_number = "REC-CS-" . $date . '/' . $invoice_num;
 
-        if($request->drafs_input == 1){
+        if ($request->drafs_input == 1) {
             $status = Invoice::STATUS_COMPLETED;
             $paid_status = Invoice::STATUS_PAID;
-        }else{
+        } else {
             $status = Invoice::STATUS_DRAFT;
             $paid_status = Invoice::STATUS_UNPAID;
         }
@@ -718,10 +706,10 @@ class InvoiceController extends Controller
         $site = Driver::where('id', $request->driver_id)->first();
 
         // Get company based settings
-        $tax_per_item = (boolean) $currentCompany->getSetting('tax_per_item');
-        $discount_per_item = (boolean) $currentCompany->getSetting('discount_per_item');
-        $sites = Site::where('id',$site->sites_id)->first();
- 
+        $tax_per_item = (bool) $currentCompany->getSetting('tax_per_item');
+        $discount_per_item = (bool) $currentCompany->getSetting('discount_per_item');
+        $sites = Site::where('id', $site->sites_id)->first();
+
         $invoice = new Invoice;
         $invoice->type = 2;
         $invoice->invoice_date = $request->invoice_date;
@@ -778,9 +766,9 @@ class InvoiceController extends Controller
         $trackinginfo->save();
 
         $last_balance = PettyCash::where('sites_id', $site->sites_id)->latest()->first();
-        if(empty($last_balance)){
+        if (empty($last_balance)) {
             $balance = 0;
-        }else{
+        } else {
             $balance = $last_balance->balance;
         }
         $pettyCash = new PettyCash;
@@ -789,7 +777,7 @@ class InvoiceController extends Controller
         $pettyCash->date = date("Y-m-d");
         $pettyCash->time = date("h:i:s");
         $pettyCash->debit = $request->grand_total;
-        $pettyCash->balance = $balance+$request->grand_total;
+        $pettyCash->balance = $balance + $request->grand_total;
         $pettyCash->save();
 
         // Arrays of data for storing Invoice Items
@@ -801,7 +789,7 @@ class InvoiceController extends Controller
         $discounts = $request->discount;
 
         // Add products (invoice items)
-        for ($i=0; $i < count($products); $i++) {
+        for ($i = 0; $i < count($products); $i++) {
             $item = $invoice->items()->create([
                 'product_id' => $products[$i],
                 'company_id' => $sites->company_id,
@@ -843,13 +831,12 @@ class InvoiceController extends Controller
      */
     public function show(Request $request)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             $clientid = Auth::user()->client_id;
             // $invoice = Invoice::findOrFail($request->invoice);
-            $invoice = Invoice::where('id',$request->invoice)->where('client_id', $clientid)->first();
+            $invoice = Invoice::where('id', $request->invoice)->where('client_id', $clientid)->first();
             // dd($invoice);
-        }else{
+        } else {
             $invoice = Invoice::findOrFail($request->invoice);
         }
 
@@ -874,13 +861,12 @@ class InvoiceController extends Controller
     public function showcash2(Request $request)
     {
 
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             $clientid = Auth::user()->client_id;
             // $invoice = Invoice::findOrFail($request->invoice);
-            $invoice = Invoice::where('id',$request->invoice)->where('client_id', $clientid)->first();
+            $invoice = Invoice::where('id', $request->invoice)->where('client_id', $clientid)->first();
             // dd($invoice);
-        }else{
+        } else {
             $invoice = Invoice::findOrFail($request->invoice);
         }
 
@@ -891,13 +877,12 @@ class InvoiceController extends Controller
     public function showcash3(Request $request)
     {
 
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             $clientid = Auth::user()->client_id;
             // $invoice = Invoice::findOrFail($request->invoice);
-            $invoice = Invoice::where('id',$request->invoice)->where('client_id', $clientid)->first();
+            $invoice = Invoice::where('id', $request->invoice)->where('client_id', $clientid)->first();
             // dd($invoice);
-        }else{
+        } else {
             $invoice = Invoice::findOrFail($request->invoice);
         }
 
@@ -926,8 +911,7 @@ class InvoiceController extends Controller
      */
     public function send(Request $request)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             abort(403);
         }
         $invoice = Invoice::findOrFail($request->invoice);
@@ -969,8 +953,7 @@ class InvoiceController extends Controller
      */
     public function mark(Request $request)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             abort(403);
         }
         $invoice = Invoice::findOrFail($request->invoice);
@@ -1125,7 +1108,7 @@ class InvoiceController extends Controller
         $invoice->items()->delete();
 
         // Add products (invoice items)
-        for ($i=0; $i < count($products); $i++) {
+        for ($i = 0; $i < count($products); $i++) {
             $item = $invoice->items()->create([
                 'product_id' => $products[$i],
                 'company_id' => $currentCompany->id,
@@ -1168,7 +1151,7 @@ class InvoiceController extends Controller
         if (!Auth::user()->can('invoices-edit')) {
             abort(403);
         }
-         //dd($request->drafs_input);
+        //dd($request->drafs_input);
         $user = $request->user();
         $currentCompany = $user->currentCompany();
 
@@ -1198,10 +1181,10 @@ class InvoiceController extends Controller
         //     $invoice->paid_status = Invoice::STATUS_PARTIALLY_PAID;
         // }
 
-        if($request->drafs_input == 1){
+        if ($request->drafs_input == 1) {
             $status = Invoice::STATUS_COMPLETED;
             $paid_status = Invoice::STATUS_PAID;
-        }else{
+        } else {
             $status = Invoice::STATUS_DRAFT;
             $paid_status = Invoice::STATUS_UNPAID;
         }
@@ -1239,7 +1222,7 @@ class InvoiceController extends Controller
         $invoice->items()->delete();
 
         // Add products (invoice items)
-        for ($i=0; $i < count($products); $i++) {
+        for ($i = 0; $i < count($products); $i++) {
             $item = $invoice->items()->create([
                 'product_id' => $products[$i],
                 'company_id' => $currentCompany->id,
@@ -1304,8 +1287,7 @@ class InvoiceController extends Controller
 
     public function driverdepandcontract($id)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             abort(403);
         }
 
@@ -1315,16 +1297,15 @@ class InvoiceController extends Controller
 
     public function productdepandcontract($id)
     {
-        if(Auth::user()->roles =="client")
-        {
+        if (Auth::user()->roles == "client") {
             abort(403);
         }
         $products = Product::where('client_id', $id)
-        ->select('id', 'name AS text', 'price')
-        ->with('taxes')
-        ->get();
+            ->select('id', 'name AS text', 'price')
+            ->with('taxes')
+            ->get();
 
-    return response()->json($products);
+        return response()->json($products);
     }
 
     public function indextracking(Request $request)
@@ -1337,31 +1318,31 @@ class InvoiceController extends Controller
         $currentCompany = $user->currentCompany();
 
         // Query Invoices by Company and Tab
-        if(Auth::user()->roles =="client"){
+        if (Auth::user()->roles == "client") {
             $query = Invoice::where('client_id', $clientid)->where('status', 'OTW')->orderBy('invoice_number', 'DESC');
-        }else{
+        } else {
             $query = Invoice::where('status', 'OTW')->orderBy('invoice_number', 'DESC');
         }
-        
+
 
 
         // Apply Filters and Paginate
         $invoices = QueryBuilder::for($query)
-        ->allowedFilters([
-            AllowedFilter::partial('invoice_number'),
-            AllowedFilter::partial('do_number'),
-            AllowedFilter::partial('receipt_number'),
-            AllowedFilter::partial('platenumbers.number_plate'),
-            AllowedFilter::partial('transporters.company_name'),
-            AllowedFilter::partial('transporterlocation.name'),
-            AllowedFilter::partial('accurate'),
-            AllowedFilter::exact('status'),
-            AllowedFilter::exact('items.quantity'),
-            AllowedFilter::exact('accurate_remark'),
-            AllowedFilter::partial('drivers.name'),
-        ])
+            ->allowedFilters([
+                AllowedFilter::partial('invoice_number'),
+                AllowedFilter::partial('do_number'),
+                AllowedFilter::partial('receipt_number'),
+                AllowedFilter::partial('platenumbers.number_plate'),
+                AllowedFilter::partial('transporters.company_name'),
+                AllowedFilter::partial('transporterlocation.name'),
+                AllowedFilter::partial('accurate'),
+                AllowedFilter::exact('status'),
+                AllowedFilter::exact('items.quantity'),
+                AllowedFilter::exact('accurate_remark'),
+                AllowedFilter::partial('drivers.name'),
+            ])
             ->latest()
-            ->paginate(10)
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('application.invoices.indextracking_info', [
@@ -1369,13 +1350,13 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function accurate(Request $request,$id)
+    public function accurate(Request $request, $id)
     {
-       //$data = Invoice::where('id', $id)->get();
-       if (!Auth::user()->can('completed-delivery-view')) {
-        abort(403);
+        //$data = Invoice::where('id', $id)->get();
+        if (!Auth::user()->can('completed-delivery-view')) {
+            abort(403);
         }
-       $data = DB::table('invoices')
+        $data = DB::table('invoices')
             ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
             ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
             ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
@@ -1385,60 +1366,57 @@ class InvoiceController extends Controller
 
         return response()->json([
             'data' => $data
-          ]);
+        ]);
     }
 
 
-    public function accuratesubmit(Request $request,$id)
+    public function accuratesubmit(Request $request, $id)
     {
         if (!Auth::user()->can('completed-delivery-view')) {
             abort(403);
-            }
-       // Find Invoice or Fail (404 Http Error)
-       $invoice = Invoice::findOrFail($id);
+        }
+        // Find Invoice or Fail (404 Http Error)
+        $invoice = Invoice::findOrFail($id);
 
-       $invoice->update([
-        'accurate' => "Accurate Quantity",
-        'accurate_remark' => $request->tonnage,
-        'status' => "COMPLETED",
+        $invoice->update([
+            'accurate' => "Accurate Quantity",
+            'accurate_remark' => $request->tonnage,
+            'status' => "COMPLETED",
 
-    ]);
+        ]);
 
-    $trackinginfo = new Trackinginfo;
-    $trackinginfo->invoice_id = $invoice->id;
-    $trackinginfo->activities = "Arrival";
-    $trackinginfo->remark = "Accurate Quantity";
-    $trackinginfo->save();
+        $trackinginfo = new Trackinginfo;
+        $trackinginfo->invoice_id = $invoice->id;
+        $trackinginfo->activities = "Arrival";
+        $trackinginfo->remark = "Accurate Quantity";
+        $trackinginfo->save();
 
-    session()->flash('alert-success',__('messages.done_added'));
-    return response()->json([
-        
-      ]);
-
+        session()->flash('alert-success', __('messages.done_added'));
+        return response()->json([]);
     }
 
 
-    public function notaccuratesubmit(Request $request,$id)
+    public function notaccuratesubmit(Request $request, $id)
     {
         if (!Auth::user()->can('completed-delivery-view')) {
             abort(403);
-            }
+        }
 
         $request->validate([
             'remark' => 'required|numeric|lt:tonnage2'
         ]);
 
-       $remark = $request->remark;
-       $tonnage2 = $request->tonnage2;
-       // Find Invoice or Fail (404 Http Error)
-       $invoice = Invoice::findOrFail($id);
-       $price_item = InvoiceItem::where('invoice_id',$id)->first();
+        $remark = $request->remark;
+        $tonnage2 = $request->tonnage2;
+        // Find Invoice or Fail (404 Http Error)
+        $invoice = Invoice::findOrFail($id);
+        $price_item = InvoiceItem::where('invoice_id', $id)->first();
 
-       $invoice->update([
-        'accurate' => "Inaccurate Quantity",
-        'status' => "COMPLETED",
-        'accurate_remark' => $remark,
-        'accurate_amount' => $remark*$price_item->price,
+        $invoice->update([
+            'accurate' => "Inaccurate Quantity",
+            'status' => "COMPLETED",
+            'accurate_remark' => $remark,
+            'accurate_amount' => $remark * $price_item->price,
 
         ]);
 
@@ -1447,12 +1425,11 @@ class InvoiceController extends Controller
         $trackinginfo->activities = "Arrival";
         $trackinginfo->remark = "Inaccurate Quantity";
         $trackinginfo->save();
-        
-        session()->flash('alert-success',__('messages.done_added'));
-         return response()->json([
-            'data' => $id
-          ]);
 
+        session()->flash('alert-success', __('messages.done_added'));
+        return response()->json([
+            'data' => $id
+        ]);
     }
 
     // public function indexcompleted(Request $request)
@@ -1498,9 +1475,9 @@ class InvoiceController extends Controller
     //         AllowedFilter::partial('drivers.name'),
     //     ])
     //     ->latest()
-    //     ->paginate(10)
+    //     ->simplePaginate(10)
     //     ->appends(request()->query());
-       
+
 
     //     return view('application.customers.index', [
     //         'invoices' => $invoices,
@@ -1517,14 +1494,14 @@ class InvoiceController extends Controller
     //         'trackings' => $trackings,
     //     ]);
     // }
-    
+
     // public function indextransaction(Request $request,$id)
     // {
     //     if (!Auth::user()->can('intransit-view')) {
     //         abort(403);
     //     }
- 
-        
+
+
     //     $receipts = Receipt::all();
     //     if($request->tab == 'unpaid') {
     //         $query = Invoice::where('client_id', $id)->where('status', 'COMPLETED')->where('paid_status', '!=', 'PAID')->latest('id');
@@ -1557,7 +1534,7 @@ class InvoiceController extends Controller
     //         //AllowedFilter::partial('drivers.name'),
     //     ])
     //     ->latest()
-    //     ->paginate(10)
+    //     ->simplePaginate(10)
     //     ->appends(request()->query());
 
     //     return view('application.estimates.index',[
@@ -1572,39 +1549,35 @@ class InvoiceController extends Controller
     {
 
         $driver_onjob = DB::table('invoices')->where('invoices.driver_id', $id)
-        ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
-        ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
-        ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
-        ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
-        ->where('invoices.status', 'OTW')
-        ->groupBy('invoice_items.invoice_id')
-        ->get();
+            ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
+            ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
+            ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
+            ->where('invoices.status', 'OTW')
+            ->groupBy('invoice_items.invoice_id')
+            ->get();
 
 
         $driver_notin = DB::table('invoices')->where('invoices.driver_id', $id)
-        ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
-        ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
-        ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
-        ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
-        ->where('invoices.accurate', 'Inaccurate Quantity')
-        ->groupBy('invoice_items.invoice_id')
-        ->get();
+            ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
+            ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
+            ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
+            ->where('invoices.accurate', 'Inaccurate Quantity')
+            ->groupBy('invoice_items.invoice_id')
+            ->get();
 
-        if($driver_onjob->count() > 0)
-        {
+        if ($driver_onjob->count() > 0) {
             $data['type'] = 1; //Driver On Job!
             $data['data'] = $driver_onjob;
-
-        }elseif($driver_notin->count() > 0)
-        {
+        } elseif ($driver_notin->count() > 0) {
             $data['type'] = "2"; //The last shipment was inaccurate
             $data['data'] = $driver_notin;
-
-        }else{
+        } else {
 
             $data['type'] = "false";
         }
-        
+
         return response()->json($data);
     }
 
@@ -1620,11 +1593,11 @@ class InvoiceController extends Controller
         $issue->datetime = $request->datetime;
         $issue->plate_number = $request->plate_number;
         $issue->invoices = $request->invoices;
-        $issue->supposed_qty = $request->suppose; 
+        $issue->supposed_qty = $request->suppose;
         $issue->arrived_qty = $request->arrived;
         $issue->reason = $request->reason;
         $issue->save();
-      
+
         return response()->json($request);
     }
 
@@ -1632,35 +1605,31 @@ class InvoiceController extends Controller
     {
 
         $lori_onjob = DB::table('invoices')->where('invoices.plate_number', $id)
-        ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
-        ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
-        ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
-        ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
-        ->where('invoices.status', 'OTW')
-        ->groupBy('invoice_items.invoice_id')
-        ->get();
+            ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
+            ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
+            ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
+            ->where('invoices.status', 'OTW')
+            ->groupBy('invoice_items.invoice_id')
+            ->get();
 
         $lori_in = DB::table('invoices')->where('invoices.plate_number', $id)
-        ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
-        ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
-        ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
-        ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
-        ->where('invoices.accurate', 'Inaccurate Quantity')
-        ->groupBy('invoice_items.invoice_id')
-        ->get();
+            ->join('drivers', 'invoices.driver_id', '=', 'drivers.id')
+            ->join('plate_number', 'invoices.plate_number_id', '=', 'plate_number.id')
+            ->join('invoice_items', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->select('invoices.*', 'drivers.name', 'plate_number.number_plate', DB::raw('SUM(invoice_items.quantity) as total_qun'))
+            ->where('invoices.accurate', 'Inaccurate Quantity')
+            ->groupBy('invoice_items.invoice_id')
+            ->get();
 
 
-        if($lori_onjob->count() > 0)
-        {
+        if ($lori_onjob->count() > 0) {
             $data['type'] = 1; //Lorry On Job!
             $data['data'] = $lori_onjob;
-
-        }elseif($lori_in->count() > 0)
-        {
+        } elseif ($lori_in->count() > 0) {
             $data['type'] = 2; //The last shipment was inaccurate
             $data['data'] = $lori_in;
-
-        }else{
+        } else {
 
             $data['type'] = "false";
         }
@@ -1678,7 +1647,7 @@ class InvoiceController extends Controller
     {
         $client = Client::where('id', $id)->first();
         $data['use_transporter'] = Client::select('transport')->where('id', $id)->get();
-        $data['transporter'] = Transporter::where('sites_id',$client->sites_id)->get();
+        $data['transporter'] = Transporter::where('sites_id', $client->sites_id)->get();
         return response()->json($data);
     }
 }

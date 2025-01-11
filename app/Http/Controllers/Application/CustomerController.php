@@ -33,7 +33,7 @@ class CustomerController extends Controller
                 AllowedFilter::scope('has_unpaid'),
             ])
             ->oldest()
-            ->paginate()
+            ->simplePaginate()
             ->appends(request()->query());
 
         return view('application.customers.index', [
@@ -49,7 +49,7 @@ class CustomerController extends Controller
     public function create()
     {
         $customer = new Customer();
- 
+
         return view('application.customers.create', [
             'customer' => $customer,
         ]);
@@ -66,7 +66,7 @@ class CustomerController extends Controller
     {
         $user = $request->user();
         $currentCompany = $user->currentCompany();
-        
+
         // Create Customer and Store in Database
         $customer = Customer::create([
             'company_id' => $currentCompany->id,
@@ -84,7 +84,7 @@ class CustomerController extends Controller
 
         session()->flash('alert-success', __('messages.customer_added'));
         return redirect()->route('customers.details', $customer->id);
-    } 
+    }
 
     /**
      * Display the Customer Details Page
@@ -97,11 +97,11 @@ class CustomerController extends Controller
     {
         $customer = Customer::findOrFail($request->customer);
 
-        $invoices = $customer->invoices()->orderBy('invoice_number')->paginate(50);
-        $estimates = $customer->estimates()->orderBy('estimate_number')->paginate(50);
-        $payments = $customer->payments()->orderBy('payment_number')->paginate(50);
+        $invoices = $customer->invoices()->orderBy('invoice_number')->simplePaginate(50);
+        $estimates = $customer->estimates()->orderBy('estimate_number')->simplePaginate(50);
+        $payments = $customer->payments()->orderBy('payment_number')->simplePaginate(50);
         $activities = Activity::where('subject_id', $customer->id)->get();
-  
+
         return view('application.customers.details', [
             'customer' => $customer,
             'invoices' => $invoices,
@@ -121,7 +121,7 @@ class CustomerController extends Controller
     public function edit(Request $request)
     {
         $customer = Customer::findOrFail($request->customer);
-        
+
         // Fill model with old input
         if (!empty($request->old())) {
             $customer->fill($request->old());
@@ -186,7 +186,7 @@ class CustomerController extends Controller
         if ($customer->payments()->exists()) {
             $customer->payments()->delete();
         }
- 
+
         // Delete Customer's Addresses from Database
         if ($customer->addresses()->exists()) {
             $customer->addresses()->delete();

@@ -36,24 +36,23 @@ class CompletedController extends Controller
     {
         if (!Auth::user()->can('completed-delivery-view')) {
             abort(403);
-            }
+        }
         $receipts = Receipt::all();
         $clientid = Auth::user()->client_id;
-        if(Auth::user()->roles =="client"){
+        if (Auth::user()->roles == "client") {
             // $query = Invoice::where('status', 'COMPLETED')->where('client_id', $clientid);
-            if($request->tab == 'paid') {
+            if ($request->tab == 'paid') {
                 $query = Invoice::where('status', 'COMPLETED')->where('paid_status', 'PAID')->where('client_id', $clientid);
                 $tab = 'paid';
-            } else { 
+            } else {
                 $query = Invoice::where('status', 'COMPLETED')->where('paid_status', '!=', 'PAID')->where('client_id', $clientid);
                 $tab = 'unpaid';
             }
-        }
-        else{
-            if($request->tab == 'paid') {
+        } else {
+            if ($request->tab == 'paid') {
                 $query = Invoice::where('status', 'COMPLETED')->where('paid_status', 'PAID')->whereNotNull('client_id');
                 $tab = 'paid';
-            } else { 
+            } else {
                 $query = Invoice::where('status', 'COMPLETED')->where('paid_status', '!=', 'PAID')->whereNotNull('client_id');
                 $tab = 'unpaid';
             }
@@ -61,23 +60,23 @@ class CompletedController extends Controller
         }
         // Apply Filters and Paginate
         $invoices = QueryBuilder::for($query)
-        ->allowedFilters([
-            AllowedFilter::partial('invoice_number'),
-            AllowedFilter::partial('do_number'),
-            AllowedFilter::partial('receipt_number'),
-            AllowedFilter::partial('platenumbers.number_plate'),
-            AllowedFilter::partial('transporters.company_name'),
-            AllowedFilter::partial('transporterlocation.name'),
-            AllowedFilter::partial('accurate'),
-            AllowedFilter::exact('status'),
-            AllowedFilter::exact('items.quantity'),
-            AllowedFilter::exact('accurate_remark'),
-            AllowedFilter::partial('drivers.name'),
-        ])
-        ->latest()
-        ->paginate(10)
-        ->appends(request()->query());
-       
+            ->allowedFilters([
+                AllowedFilter::partial('invoice_number'),
+                AllowedFilter::partial('do_number'),
+                AllowedFilter::partial('receipt_number'),
+                AllowedFilter::partial('platenumbers.number_plate'),
+                AllowedFilter::partial('transporters.company_name'),
+                AllowedFilter::partial('transporterlocation.name'),
+                AllowedFilter::partial('accurate'),
+                AllowedFilter::exact('status'),
+                AllowedFilter::exact('items.quantity'),
+                AllowedFilter::exact('accurate_remark'),
+                AllowedFilter::partial('drivers.name'),
+            ])
+            ->latest()
+            ->simplePaginate(10)
+            ->appends(request()->query());
+
 
         return view('application.customers.index', [
             'invoices' => $invoices,
@@ -87,7 +86,7 @@ class CompletedController extends Controller
         ]);
     }
 
-    public function tracking(Request $request,$id)
+    public function tracking(Request $request, $id)
     {
         $trackings = Trackinginfo::where('invoice_id', $id)->get();
         return view('application.customers.create', [

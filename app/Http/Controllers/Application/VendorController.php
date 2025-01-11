@@ -23,7 +23,7 @@ class VendorController extends Controller
     {
         $user = $request->user();
         $currentCompany = $user->currentCompany();
- 
+
         // Get Vendors by Company and Filters
         $vendors = QueryBuilder::for(Vendor::findByCompany($currentCompany->id))
             ->allowedFilters([
@@ -31,7 +31,7 @@ class VendorController extends Controller
                 AllowedFilter::partial('contact_name'),
             ])
             ->oldest()
-            ->paginate()
+            ->simplePaginate(10)
             ->appends(request()->query());
 
         return view('application.vendors.index', [
@@ -81,13 +81,13 @@ class VendorController extends Controller
             'phone' => $request->phone,
             'website' => $request->website,
         ]);
- 
+
         // Set Vendor's Billing Address 
         $vendor->address('billing', $request->input('billing'));
 
         session()->flash('alert-success', __('messages.vendor_added'));
         return redirect()->route('vendors.details', $vendor->id);
-    } 
+    }
 
     /**
      * Display the Vendor Details Page
@@ -101,7 +101,7 @@ class VendorController extends Controller
         $vendor = Vendor::findOrFail($request->vendor);
 
         // Get Expenses by Vendor
-        $expenses = $vendor->expenses()->orderBy('created_at')->paginate(50);
+        $expenses = $vendor->expenses()->orderBy('created_at')->simplePaginate(50);
 
         return view('application.vendors.details', [
             'vendor' => $vendor,
@@ -135,7 +135,7 @@ class VendorController extends Controller
     public function update(Update $request)
     {
         $vendor = Vendor::findOrFail($request->vendor);
-        
+
         // Update Vendor in Database
         $vendor->update([
             'display_name' => $request->display_name,
